@@ -1,0 +1,6 @@
+@TritoteNic_HostAddress = http://localhost:5079
+
+GET {{TritoteNic_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
