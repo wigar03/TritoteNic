@@ -11,30 +11,16 @@ namespace SharedModels.Dto
 {
     public class PedidoDto
     {
-        [Required]
-        [ForeignKey("Cliente")]
+        public int IdPedido { get; set; }
         public int IdCliente { get; set; }
-
-        public Cliente Cliente { get; set; }
-
-        [Required]
-        [ForeignKey("Usuario")]
+        public string? NombreCliente { get; set; }
         public int IdUsuario { get; set; }
-
-        public Usuario Usuario { get; set; }
-
-        [Required]
-        public DateTime FechaPedido { get; set; } = DateTime.Now;
-
-        [Required, StringLength(30)]
-        public string Estado { get; set; } // Pendiente, En Proceso, Completado, Retrasado
-
-        [Required, StringLength(50)]
-        public string MetodoPago { get; set; } // Efectivo, Tarjeta, Transferencia
-
-        [Required]
-        public decimal Total { get; set; }
-
-        public ICollection<DetallePedido> Detalles { get; set; } = new List<DetallePedido>();
+        public string? NombreUsuario { get; set; }
+        public int IdEstadoPedido { get; set; }
+        public string? NombreEstadoPedido { get; set; }
+        public int IdMetodoPago { get; set; }
+        public string? NombreMetodoPago { get; set; }
+        public DateTime FechaPedido { get; set; }
+        public decimal TotalPedido { get; set; }
     }
 }

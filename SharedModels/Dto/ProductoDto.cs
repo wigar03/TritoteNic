@@ -11,24 +11,14 @@ namespace SharedModels.Dto
 {
     public class ProductoDto
     {
-        [Required, StringLength(100)]
-        public string Nombre { get; set; }
-
-        [StringLength(255)]
-        public string Descripcion { get; set; }
-
-        [Required]
-        public decimal Precio { get; set; }
-
-        [Required]
-        public int Stock { get; set; }
-
-        [Required, StringLength(50)]
-        public string Categoria { get; set; }
-
-        [Required, StringLength(20)]
-        public string Estado { get; set; } // Activo, Inactivo
-
-        public ICollection<DetallePedido> DetallesPedido { get; set; } = new List<DetallePedido>();
+        public int IdProducto { get; set; }
+        public string? NombreProducto { get; set; }
+        public string? DescripcionProducto { get; set; }
+        public decimal PrecioProducto { get; set; }
+        public int StockProducto { get; set; }
+        public string? EstadoProducto { get; set; }
+        public string? ImagenProducto { get; set; }
+        public int IdCategoria { get; set; }
+        public string? NombreCategoria { get; set; }
     }
 }

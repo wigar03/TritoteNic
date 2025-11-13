@@ -13,28 +13,30 @@ namespace SharedModels.Clases
         public int IdProducto { get; set; }
 
         [Required, StringLength(100)]
-        [Column("nombre")]
-        public string Nombre { get; set; }
+        public string NombreProducto { get; set; }
 
         [StringLength(255)]
-        [Column("descripcion")]
-        public string Descripcion { get; set; }
+        public string DescripcionProducto { get; set; }
 
         [Required]
-        [Column("precio", TypeName = "decimal(10,2)")]
-        public decimal Precio { get; set; }
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal PrecioProducto { get; set; }
 
         [Required]
-        [Column("stock")]
-        public int Stock { get; set; }
+        public int StockProducto { get; set; }
 
-        [Required, StringLength(50)]
-        [Column("categoria")]
-        public string Categoria { get; set; }
+        [Required]
+        [ForeignKey("Categoria")]
+        [Column("id_categoria")]
+        public int IdCategoria { get; set; }
+
+        public Categoria Categoria { get; set; }
 
         [Required, StringLength(20)]
-        [Column("estado")]
-        public string Estado { get; set; } // Activo, Inactivo
+        public string EstadoProducto { get; set; } // Activo / Inactivo
+
+        [StringLength(255)]
+        public string ImagenProducto { get; set; }
 
         public ICollection<DetallePedido> DetallesPedido { get; set; } = new List<DetallePedido>();
     }

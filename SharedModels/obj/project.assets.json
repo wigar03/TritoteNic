@@ -41,11 +41,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\wigar\\OneDrive\\Documents\\GitHub\\TritoteNic\\SharedModels\\SharedModels.csproj",
+      "projectUniqueName": "D:\\Git\\New folder\\SharedModels\\SharedModels.csproj",
       "projectName": "SharedModels",
-      "projectPath": "C:\\Users\\wigar\\OneDrive\\Documents\\GitHub\\TritoteNic\\SharedModels\\SharedModels.csproj",
+      "projectPath": "D:\\Git\\New folder\\SharedModels\\SharedModels.csproj",
       "packagesPath": "C:\\Users\\wigar\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\wigar\\OneDrive\\Documents\\GitHub\\TritoteNic\\SharedModels\\obj\\",
+      "outputPath": "D:\\Git\\New folder\\SharedModels\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

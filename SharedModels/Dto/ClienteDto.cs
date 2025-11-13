@@ -11,19 +11,10 @@ namespace SharedModels.Dto
 {
     public class ClienteDto
     {
-        [Required, StringLength(100)]
-        public string Nombre { get; set; }
-
-        [StringLength(15)]
-        public string Telefono { get; set; }
-
-        [StringLength(255)]
-        public string Direccion { get; set; }
-
-        [StringLength(100)]
-        public string Email { get; set; }
-
-        // Relación con pedidos
-        public ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
+        public int IdCliente { get; set; }
+        public string? NombreCliente { get; set; }
+        public string? TelefonoCliente { get; set; }
+        public string? DireccionCliente { get; set; }
+        public string? EmailCliente { get; set; }
     }
 }

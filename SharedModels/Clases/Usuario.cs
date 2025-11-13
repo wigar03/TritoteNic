@@ -10,32 +10,30 @@ namespace SharedModels.Clases
     {
         [Key]
         [Column("id_usuario")]
-        public int Id_Usuario { get; set; }
+        public int IdUsuario { get; set; }
 
         [Required, StringLength(100)]
-        [Column("nombre")]
-        public string Nombre_Usuario { get; set; }
+        public string NombreUsuario { get; set; }
 
         [Required, StringLength(100)]
-        [Column("email")]
-        public string Email { get; set; }
+        public string EmailUsuario { get; set; }
 
         [Required, StringLength(255)]
-        [Column("contraseña")]
-        public string Contraseña { get; set; }
+        public string ContrasenaUsuario { get; set; }
 
-        [Required, StringLength(50)]
-        [Column("rol")]
-        public string Rol { get; set; } // Administrador, Vendedor, Analista
+        [Required]
+        [ForeignKey("Rol")]
+        [Column("id_rol")]
+        public int IdRol { get; set; }
+
+        public Rol Rol { get; set; }
 
         [Required, StringLength(20)]
-        [Column("estado")]
-        public string Estado { get; set; } // Activo, Inactivo
+        public string EstadoUsuario { get; set; } // Activo / Inactivo
 
         [Column("fecha_creacion")]
-        public DateTime FechaCreacion { get; set; } = DateTime.Now;
+        public DateTime FechaCreacionUsuario { get; set; } = DateTime.Now;
 
-        // Relación con pedidos (1 Usuario puede registrar muchos pedidos)
         public ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
     }
 

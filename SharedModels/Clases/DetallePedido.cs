@@ -27,15 +27,14 @@ namespace SharedModels.Clases
         public Producto Producto { get; set; }
 
         [Required]
-        [Column("cantidad")]
-        public int Cantidad { get; set; }
+        public int CantidadProducto { get; set; }
 
         [Required]
         [Column("precio_unitario", TypeName = "decimal(10,2)")]
-        public decimal PrecioUnitario { get; set; }
+        public decimal PrecioUnitarioProducto { get; set; }
 
         [Required]
         [Column("subtotal", TypeName = "decimal(10,2)")]
-        public decimal Subtotal { get; set; }
+        public decimal SubtotalProducto { get; set; }
     }
 }

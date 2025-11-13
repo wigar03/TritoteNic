@@ -9,3 +9,15 @@ C:\Users\wigar\OneDrive\Documents\GitHub\TritoteNic\SharedModels\obj\Debug\net9.
 C:\Users\wigar\OneDrive\Documents\GitHub\TritoteNic\SharedModels\obj\Debug\net9.0\refint\SharedModels.dll
 C:\Users\wigar\OneDrive\Documents\GitHub\TritoteNic\SharedModels\obj\Debug\net9.0\SharedModels.pdb
 C:\Users\wigar\OneDrive\Documents\GitHub\TritoteNic\SharedModels\obj\Debug\net9.0\ref\SharedModels.dll
+D:\Git\New folder\SharedModels\obj\Debug\net9.0\SharedModels.GeneratedMSBuildEditorConfig.editorconfig
+D:\Git\New folder\SharedModels\obj\Debug\net9.0\SharedModels.AssemblyInfoInputs.cache
+D:\Git\New folder\SharedModels\obj\Debug\net9.0\SharedModels.AssemblyInfo.cs
+D:\Git\New folder\SharedModels\obj\Debug\net9.0\SharedModels.csproj.CoreCompileInputs.cache
+D:\Git\New folder\SharedModels\obj\Debug\net9.0\SharedModels.sourcelink.json
+D:\Git\New folder\SharedModels\obj\Debug\net9.0\SharedModels.dll
+D:\Git\New folder\SharedModels\obj\Debug\net9.0\refint\SharedModels.dll
+D:\Git\New folder\SharedModels\obj\Debug\net9.0\SharedModels.pdb
+D:\Git\New folder\SharedModels\bin\Debug\net9.0\SharedModels.deps.json
+D:\Git\New folder\SharedModels\bin\Debug\net9.0\SharedModels.dll
+D:\Git\New folder\SharedModels\bin\Debug\net9.0\SharedModels.pdb
+D:\Git\New folder\SharedModels\obj\Debug\net9.0\ref\SharedModels.dll

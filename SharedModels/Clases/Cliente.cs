@@ -13,22 +13,17 @@ namespace SharedModels.Clases
         public int IdCliente { get; set; }
 
         [Required, StringLength(100)]
-        [Column("nombre")]
-        public string Nombre { get; set; }
+        public string NombreCliente { get; set; }
 
         [StringLength(15)]
-        [Column("telefono")]
-        public string Telefono { get; set; }
+        public string TelefonoCliente { get; set; }
 
         [StringLength(255)]
-        [Column("direccion")]
-        public string Direccion { get; set; }
+        public string DireccionCliente { get; set; }
 
         [StringLength(100)]
-        [Column("email")]
-        public string Email { get; set; }
+        public string EmailCliente { get; set; }
 
-        // Relación con pedidos
         public ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
     }
 }

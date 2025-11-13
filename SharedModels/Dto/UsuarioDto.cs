@@ -11,24 +11,12 @@ namespace SharedModels.Dto
 {
     public class UsuarioDto
     {
-        [Required, StringLength(100)]
-        public string Nombre_Usuario { get; set; }
-
-        [Required, StringLength(100)]
-        public string Email { get; set; }
-
-        [Required, StringLength(255)]
-        public string Contraseña { get; set; }
-
-        [Required, StringLength(50)]
-        public string Rol { get; set; } // Administrador, Vendedor, Analista
-
-        [Required, StringLength(20)]
-        public string Estado { get; set; } // Activo, Inactivo
-
-        public DateTime FechaCreacion { get; set; } = DateTime.Now;
-
-        // Relación con pedidos (1 Usuario puede registrar muchos pedidos)
-        public ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
+        public int IdUsuario { get; set; }
+        public string? NombreUsuario { get; set; }
+        public string? EmailUsuario { get; set; }
+        public string? EstadoUsuario { get; set; }
+        public DateTime FechaCreacionUsuario { get; set; }
+        public int IdRol { get; set; }
+        public string? NombreRol { get; set; }
     }
 }

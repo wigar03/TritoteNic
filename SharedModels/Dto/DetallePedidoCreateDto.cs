@@ -15,13 +15,13 @@ namespace SharedModels.Dto
         [ForeignKey("Pedido")]
         public int IdPedido { get; set; }
 
-        public Pedido Pedido { get; set; }
+        public Pedido? Pedido { get; set; }
 
         [Required]
         [ForeignKey("Producto")]
         public int IdProducto { get; set; }
 
-        public Producto Producto { get; set; }
+        public Producto? Producto { get; set; }
 
         [Required]
         public int Cantidad { get; set; }

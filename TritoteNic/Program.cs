@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TritoteNic.Data;
+using TritoteNic;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<TritoteContext.TritoteConext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddAutoMapper(typeof(MappingConfig));
+
+builder.Services.AddControllers().AddNewtonsoftJson();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

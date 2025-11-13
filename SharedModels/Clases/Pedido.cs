@@ -27,20 +27,26 @@ namespace SharedModels.Clases
         public Usuario Usuario { get; set; }
 
         [Required]
+        [ForeignKey("EstadoPedido")]
+        [Column("id_estado_pedido")]
+        public int IdEstadoPedido { get; set; }
+
+        public EstadoPedido EstadoPedido { get; set; }
+
+        [Required]
+        [ForeignKey("MetodoPago")]
+        [Column("id_metodo_pago")]
+        public int IdMetodoPago { get; set; }
+
+        public MetodoPago MetodoPago { get; set; }
+
+        [Required]
         [Column("fecha_pedido")]
         public DateTime FechaPedido { get; set; } = DateTime.Now;
 
-        [Required, StringLength(30)]
-        [Column("estado")]
-        public string Estado { get; set; } // Pendiente, En Proceso, Completado, Retrasado
-
-        [Required, StringLength(50)]
-        [Column("metodo_pago")]
-        public string MetodoPago { get; set; } // Efectivo, Tarjeta, Transferencia
-
         [Required]
         [Column("total", TypeName = "decimal(10,2)")]
-        public decimal Total { get; set; }
+        public decimal TotalPedido { get; set; }
 
         public ICollection<DetallePedido> Detalles { get; set; } = new List<DetallePedido>();
     }

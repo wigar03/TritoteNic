@@ -22,7 +22,31 @@ namespace TritoteNic.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SharedModels.Cliente", b =>
+            modelBuilder.Entity("SharedModels.Clases.Categoria", b =>
+                {
+                    b.Property<int>("IdCategoria")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id_categoria");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCategoria"));
+
+                    b.Property<string>("DescripcionCategoria")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("NombreCategoria")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("IdCategoria");
+
+                    b.ToTable("Categorias");
+                });
+
+            modelBuilder.Entity("SharedModels.Clases.Cliente", b =>
                 {
                     b.Property<int>("IdCliente")
                         .ValueGeneratedOnAdd()
@@ -31,36 +55,32 @@ namespace TritoteNic.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCliente"));
 
-                    b.Property<string>("Direccion")
+                    b.Property<string>("DireccionCliente")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("direccion");
+                        .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("EmailCliente")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("email");
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("NombreCliente")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("nombre");
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Telefono")
+                    b.Property<string>("TelefonoCliente")
                         .IsRequired()
                         .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)")
-                        .HasColumnName("telefono");
+                        .HasColumnType("nvarchar(15)");
 
                     b.HasKey("IdCliente");
 
                     b.ToTable("Clientes");
                 });
 
-            modelBuilder.Entity("SharedModels.DetallePedido", b =>
+            modelBuilder.Entity("SharedModels.Clases.DetallePedido", b =>
                 {
                     b.Property<int>("IdDetalle")
                         .ValueGeneratedOnAdd()
@@ -69,9 +89,8 @@ namespace TritoteNic.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDetalle"));
 
-                    b.Property<int>("Cantidad")
-                        .HasColumnType("int")
-                        .HasColumnName("cantidad");
+                    b.Property<int>("CantidadProducto")
+                        .HasColumnType("int");
 
                     b.Property<int>("IdPedido")
                         .HasColumnType("int")
@@ -81,11 +100,11 @@ namespace TritoteNic.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id_producto");
 
-                    b.Property<decimal>("PrecioUnitario")
+                    b.Property<decimal>("PrecioUnitarioProducto")
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("precio_unitario");
 
-                    b.Property<decimal>("Subtotal")
+                    b.Property<decimal>("SubtotalProducto")
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("subtotal");
 
@@ -98,7 +117,55 @@ namespace TritoteNic.Migrations
                     b.ToTable("DetallesPedido");
                 });
 
-            modelBuilder.Entity("SharedModels.Pedido", b =>
+            modelBuilder.Entity("SharedModels.Clases.EstadoPedido", b =>
+                {
+                    b.Property<int>("IdEstadoPedido")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id_estado_pedido");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdEstadoPedido"));
+
+                    b.Property<string>("DescripcionEstadoPedido")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("NombreEstadoPedido")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("IdEstadoPedido");
+
+                    b.ToTable("EstadosPedido");
+                });
+
+            modelBuilder.Entity("SharedModels.Clases.MetodoPago", b =>
+                {
+                    b.Property<int>("IdMetodoPago")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id_metodo_pago");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMetodoPago"));
+
+                    b.Property<string>("DescripcionMetodoPago")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("NombreMetodoPago")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("IdMetodoPago");
+
+                    b.ToTable("MetodosPago");
+                });
+
+            modelBuilder.Entity("SharedModels.Clases.Pedido", b =>
                 {
                     b.Property<int>("IdPedido")
                         .ValueGeneratedOnAdd()
@@ -106,12 +173,6 @@ namespace TritoteNic.Migrations
                         .HasColumnName("id_pedido");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPedido"));
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
-                        .HasColumnName("estado");
 
                     b.Property<DateTime>("FechaPedido")
                         .HasColumnType("datetime2")
@@ -121,17 +182,19 @@ namespace TritoteNic.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id_cliente");
 
+                    b.Property<int>("IdEstadoPedido")
+                        .HasColumnType("int")
+                        .HasColumnName("id_estado_pedido");
+
+                    b.Property<int>("IdMetodoPago")
+                        .HasColumnType("int")
+                        .HasColumnName("id_metodo_pago");
+
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int")
                         .HasColumnName("id_usuario");
 
-                    b.Property<string>("MetodoPago")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("metodo_pago");
-
-                    b.Property<decimal>("Total")
+                    b.Property<decimal>("TotalPedido")
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("total");
 
@@ -139,12 +202,16 @@ namespace TritoteNic.Migrations
 
                     b.HasIndex("IdCliente");
 
+                    b.HasIndex("IdEstadoPedido");
+
+                    b.HasIndex("IdMetodoPago");
+
                     b.HasIndex("IdUsuario");
 
                     b.ToTable("Pedidos");
                 });
 
-            modelBuilder.Entity("SharedModels.Producto", b =>
+            modelBuilder.Entity("SharedModels.Clases.Producto", b =>
                 {
                     b.Property<int>("IdProducto")
                         .ValueGeneratedOnAdd()
@@ -153,44 +220,68 @@ namespace TritoteNic.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdProducto"));
 
-                    b.Property<string>("Categoria")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("categoria");
-
-                    b.Property<string>("Descripcion")
+                    b.Property<string>("DescripcionProducto")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("descripcion");
+                        .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("Estado")
+                    b.Property<string>("EstadoProducto")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("estado");
+                        .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("Nombre")
+                    b.Property<int>("IdCategoria")
+                        .HasColumnType("int")
+                        .HasColumnName("id_categoria");
+
+                    b.Property<string>("ImagenProducto")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("NombreProducto")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("nombre");
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("Precio")
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("precio");
+                    b.Property<decimal>("PrecioProducto")
+                        .HasColumnType("decimal(10,2)");
 
-                    b.Property<int>("Stock")
-                        .HasColumnType("int")
-                        .HasColumnName("stock");
+                    b.Property<int>("StockProducto")
+                        .HasColumnType("int");
 
                     b.HasKey("IdProducto");
+
+                    b.HasIndex("IdCategoria");
 
                     b.ToTable("Productos");
                 });
 
-            modelBuilder.Entity("SharedModels.Usuario", b =>
+            modelBuilder.Entity("SharedModels.Clases.Rol", b =>
+                {
+                    b.Property<int>("IdRol")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id_rol");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdRol"));
+
+                    b.Property<string>("DescripcionRol")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("NombreRol")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("IdRol");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("SharedModels.Clases.Usuario", b =>
                 {
                     b.Property<int>("IdUsuario")
                         .ValueGeneratedOnAdd()
@@ -199,54 +290,50 @@ namespace TritoteNic.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdUsuario"));
 
-                    b.Property<string>("Contraseña")
+                    b.Property<string>("ContrasenaUsuario")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("contraseña");
+                        .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("EmailUsuario")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("email");
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Estado")
+                    b.Property<string>("EstadoUsuario")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("estado");
+                        .HasColumnType("nvarchar(20)");
 
-                    b.Property<DateTime>("FechaCreacion")
+                    b.Property<DateTime>("FechaCreacionUsuario")
                         .HasColumnType("datetime2")
                         .HasColumnName("fecha_creacion");
 
-                    b.Property<string>("Nombre")
+                    b.Property<int>("IdRol")
+                        .HasColumnType("int")
+                        .HasColumnName("id_rol");
+
+                    b.Property<string>("NombreUsuario")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("nombre");
-
-                    b.Property<string>("Rol")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("rol");
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("IdUsuario");
+
+                    b.HasIndex("IdRol");
 
                     b.ToTable("Usuarios");
                 });
 
-            modelBuilder.Entity("SharedModels.DetallePedido", b =>
+            modelBuilder.Entity("SharedModels.Clases.DetallePedido", b =>
                 {
-                    b.HasOne("SharedModels.Pedido", "Pedido")
+                    b.HasOne("SharedModels.Clases.Pedido", "Pedido")
                         .WithMany("Detalles")
                         .HasForeignKey("IdPedido")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SharedModels.Producto", "Producto")
+                    b.HasOne("SharedModels.Clases.Producto", "Producto")
                         .WithMany("DetallesPedido")
                         .HasForeignKey("IdProducto")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -257,15 +344,27 @@ namespace TritoteNic.Migrations
                     b.Navigation("Producto");
                 });
 
-            modelBuilder.Entity("SharedModels.Pedido", b =>
+            modelBuilder.Entity("SharedModels.Clases.Pedido", b =>
                 {
-                    b.HasOne("SharedModels.Cliente", "Cliente")
+                    b.HasOne("SharedModels.Clases.Cliente", "Cliente")
                         .WithMany("Pedidos")
                         .HasForeignKey("IdCliente")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SharedModels.Usuario", "Usuario")
+                    b.HasOne("SharedModels.Clases.EstadoPedido", "EstadoPedido")
+                        .WithMany("Pedidos")
+                        .HasForeignKey("IdEstadoPedido")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SharedModels.Clases.MetodoPago", "MetodoPago")
+                        .WithMany("Pedidos")
+                        .HasForeignKey("IdMetodoPago")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SharedModels.Clases.Usuario", "Usuario")
                         .WithMany("Pedidos")
                         .HasForeignKey("IdUsuario")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -273,25 +372,71 @@ namespace TritoteNic.Migrations
 
                     b.Navigation("Cliente");
 
+                    b.Navigation("EstadoPedido");
+
+                    b.Navigation("MetodoPago");
+
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("SharedModels.Cliente", b =>
+            modelBuilder.Entity("SharedModels.Clases.Producto", b =>
+                {
+                    b.HasOne("SharedModels.Clases.Categoria", "Categoria")
+                        .WithMany("Productos")
+                        .HasForeignKey("IdCategoria")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Categoria");
+                });
+
+            modelBuilder.Entity("SharedModels.Clases.Usuario", b =>
+                {
+                    b.HasOne("SharedModels.Clases.Rol", "Rol")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("IdRol")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Rol");
+                });
+
+            modelBuilder.Entity("SharedModels.Clases.Categoria", b =>
+                {
+                    b.Navigation("Productos");
+                });
+
+            modelBuilder.Entity("SharedModels.Clases.Cliente", b =>
                 {
                     b.Navigation("Pedidos");
                 });
 
-            modelBuilder.Entity("SharedModels.Pedido", b =>
+            modelBuilder.Entity("SharedModels.Clases.EstadoPedido", b =>
+                {
+                    b.Navigation("Pedidos");
+                });
+
+            modelBuilder.Entity("SharedModels.Clases.MetodoPago", b =>
+                {
+                    b.Navigation("Pedidos");
+                });
+
+            modelBuilder.Entity("SharedModels.Clases.Pedido", b =>
                 {
                     b.Navigation("Detalles");
                 });
 
-            modelBuilder.Entity("SharedModels.Producto", b =>
+            modelBuilder.Entity("SharedModels.Clases.Producto", b =>
                 {
                     b.Navigation("DetallesPedido");
                 });
 
-            modelBuilder.Entity("SharedModels.Usuario", b =>
+            modelBuilder.Entity("SharedModels.Clases.Rol", b =>
+                {
+                    b.Navigation("Usuarios");
+                });
+
+            modelBuilder.Entity("SharedModels.Clases.Usuario", b =>
                 {
                     b.Navigation("Pedidos");
                 });
