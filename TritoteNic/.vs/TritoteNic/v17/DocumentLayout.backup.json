@@ -66,8 +66,7 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T19:07:58.732Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T19:07:58.732Z"
             },
             {
               "$type": "Document",
@@ -92,8 +91,7 @@
               "RelativeToolTip": "Controllers\\MetodoPagoController.cs",
               "ViewState": "AgIAAKgAAAAAAAAAAAAowM8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:54:55.744Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T17:54:55.744Z"
             },
             {
               "$type": "Document",
@@ -105,8 +103,7 @@
               "RelativeToolTip": "Controllers\\EstadoPedidoController.cs",
               "ViewState": "AgIAAJ8AAAAAAAAAAAAlwAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:55:11.46Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T17:55:11.46Z"
             },
             {
               "$type": "Document",
@@ -118,8 +115,7 @@
               "RelativeToolTip": "Controllers\\DetallePedidoController.cs",
               "ViewState": "AgIAAPIAAAAAAAAAAAAAAAUBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:55:42.522Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T17:55:42.522Z"
             },
             {
               "$type": "Document",
@@ -131,8 +127,7 @@
               "RelativeToolTip": "Controllers\\ClienteController.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAvwAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:56:02.496Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T17:56:02.496Z"
             },
             {
               "$type": "Document",
@@ -144,8 +139,7 @@
               "RelativeToolTip": "Controllers\\CategoriaController.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAvwAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:56:40.934Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T17:56:40.934Z"
             },
             {
               "$type": "Document",
@@ -157,8 +151,7 @@
               "RelativeToolTip": "Controllers\\PedidoController.cs",
               "ViewState": "AgIAANAAAAAAAAAAAAAAAKkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:54:35.29Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T17:54:35.29Z"
             },
             {
               "$type": "Document",
@@ -170,8 +163,7 @@
               "RelativeToolTip": "Controllers\\ProductoController.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAvwAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:54:21.545Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T17:54:21.545Z"
             },
             {
               "$type": "Document",
@@ -183,8 +175,7 @@
               "RelativeToolTip": "Controllers\\RolController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAEQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:54:00.769Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T17:54:00.769Z"
             },
             {
               "$type": "Document",
@@ -196,8 +187,7 @@
               "RelativeToolTip": "Data\\TritoteContext.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T15:59:17.791Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T15:59:17.791Z"
             }
           ]
         }

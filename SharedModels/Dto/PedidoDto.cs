@@ -21,6 +21,9 @@ namespace SharedModels.Dto
         public int IdMetodoPago { get; set; }
         public string? NombreMetodoPago { get; set; }
         public DateTime FechaPedido { get; set; }
+        public decimal? SubtotalPedido { get; set; }
+        public decimal Descuento { get; set; }
         public decimal TotalPedido { get; set; }
+        public List<DetallePedidoDto>? Detalles { get; set; }
     }
 }

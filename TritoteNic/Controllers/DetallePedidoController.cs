@@ -122,15 +122,10 @@ namespace TritoteNic.Controllers
 
             try
             {
-                _logger.LogInformation($"Creando detalle para Pedido ID: {createDto.IdPedido}, Producto ID: {createDto.IdProducto}");
+                _logger.LogInformation($"Creando detalle para Producto ID: {createDto.IdProducto}");
 
                 // Validar FKs (opcional pero evita errores de integridad)
                 var fkInvalid = false;
-                if (!await _context.Pedidos.AnyAsync(p => p.IdPedido == createDto.IdPedido))
-                {
-                    ModelState.AddModelError("IdPedido", "El pedido no existe.");
-                    fkInvalid = true;
-                }
                 if (!await _context.Productos.AnyAsync(p => p.IdProducto == createDto.IdProducto))
                 {
                     ModelState.AddModelError("IdProducto", "El producto no existe.");
@@ -148,14 +143,13 @@ namespace TritoteNic.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Mapeo manual porque los nombres del CreateDto no coinciden con la entidad
+                // Mapeo manual
                 var detalle = new DetallePedido
                 {
-                    IdPedido = createDto.IdPedido,
                     IdProducto = createDto.IdProducto,
-                    CantidadProducto = createDto.Cantidad,
-                    PrecioUnitarioProducto = createDto.PrecioUnitario,
-                    SubtotalProducto = createDto.Subtotal
+                    CantidadProducto = createDto.CantidadProducto,
+                    PrecioUnitarioProducto = createDto.PrecioUnitarioProducto,
+                    SubtotalProducto = createDto.SubtotalProducto
                 };
 
                 _context.DetallesPedido.Add(detalle);

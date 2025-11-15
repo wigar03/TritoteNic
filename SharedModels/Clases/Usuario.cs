@@ -34,6 +34,9 @@ namespace SharedModels.Clases
         [Column("fecha_creacion")]
         public DateTime FechaCreacionUsuario { get; set; } = DateTime.Now;
 
+        [Column("ultimo_acceso")]
+        public DateTime? UltimoAcceso { get; set; }
+
         public ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
     }
 

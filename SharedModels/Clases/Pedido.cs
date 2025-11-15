@@ -48,6 +48,12 @@ namespace SharedModels.Clases
         [Column("total", TypeName = "decimal(10,2)")]
         public decimal TotalPedido { get; set; }
 
+        [Column("descuento", TypeName = "decimal(5,2)")]
+        public decimal Descuento { get; set; } = 0; // Porcentaje de descuento
+
+        [Column("subtotal", TypeName = "decimal(10,2)")]
+        public decimal? SubtotalPedido { get; set; } // Subtotal antes de descuento
+
         public ICollection<DetallePedido> Detalles { get; set; } = new List<DetallePedido>();
     }
 }

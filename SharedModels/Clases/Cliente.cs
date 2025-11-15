@@ -24,6 +24,15 @@ namespace SharedModels.Clases
         [StringLength(100)]
         public string EmailCliente { get; set; }
 
+        [StringLength(20)]
+        public string? CategoriaCliente { get; set; } // VIP, Frecuente, Regular
+
+        [Column("total_gastado", TypeName = "decimal(10,2)")]
+        public decimal TotalGastado { get; set; } = 0;
+
+        [Column("fecha_ultimo_pedido")]
+        public DateTime? FechaUltimoPedido { get; set; }
+
         public ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
     }
 }

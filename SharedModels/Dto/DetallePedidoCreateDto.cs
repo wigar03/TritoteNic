@@ -12,24 +12,15 @@ namespace SharedModels.Dto
     public class DetallePedidoCreateDto
     {
         [Required]
-        [ForeignKey("Pedido")]
-        public int IdPedido { get; set; }
-
-        public Pedido? Pedido { get; set; }
-
-        [Required]
-        [ForeignKey("Producto")]
         public int IdProducto { get; set; }
 
-        public Producto? Producto { get; set; }
+        [Required]
+        public int CantidadProducto { get; set; }
 
         [Required]
-        public int Cantidad { get; set; }
+        public decimal PrecioUnitarioProducto { get; set; }
 
         [Required]
-        public decimal PrecioUnitario { get; set; }
-
-        [Required]
-        public decimal Subtotal { get; set; }
+        public decimal SubtotalProducto { get; set; }
     }
 }

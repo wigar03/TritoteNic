@@ -2,8 +2,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TritoteNic.Data;
 
 #nullable disable
@@ -18,28 +18,28 @@ namespace TritoteNic.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("SharedModels.Clases.Categoria", b =>
                 {
                     b.Property<int>("IdCategoria")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_categoria");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCategoria"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdCategoria"));
 
                     b.Property<string>("DescripcionCategoria")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("NombreCategoria")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("IdCategoria");
 
@@ -50,30 +50,42 @@ namespace TritoteNic.Migrations
                 {
                     b.Property<int>("IdCliente")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_cliente");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCliente"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdCliente"));
+
+                    b.Property<string>("CategoriaCliente")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("DireccionCliente")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("EmailCliente")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("FechaUltimoPedido")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_ultimo_pedido");
 
                     b.Property<string>("NombreCliente")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("TelefonoCliente")
                         .IsRequired()
                         .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
+                        .HasColumnType("character varying(15)");
+
+                    b.Property<decimal>("TotalGastado")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("total_gastado");
 
                     b.HasKey("IdCliente");
 
@@ -84,20 +96,20 @@ namespace TritoteNic.Migrations
                 {
                     b.Property<int>("IdDetalle")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_detalle");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDetalle"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdDetalle"));
 
                     b.Property<int>("CantidadProducto")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("IdPedido")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_pedido");
 
                     b.Property<int>("IdProducto")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_producto");
 
                     b.Property<decimal>("PrecioUnitarioProducto")
@@ -121,20 +133,20 @@ namespace TritoteNic.Migrations
                 {
                     b.Property<int>("IdEstadoPedido")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_estado_pedido");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdEstadoPedido"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdEstadoPedido"));
 
                     b.Property<string>("DescripcionEstadoPedido")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("NombreEstadoPedido")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("IdEstadoPedido");
 
@@ -145,20 +157,20 @@ namespace TritoteNic.Migrations
                 {
                     b.Property<int>("IdMetodoPago")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_metodo_pago");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdMetodoPago"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdMetodoPago"));
 
                     b.Property<string>("DescripcionMetodoPago")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("NombreMetodoPago")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("IdMetodoPago");
 
@@ -169,30 +181,38 @@ namespace TritoteNic.Migrations
                 {
                     b.Property<int>("IdPedido")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_pedido");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPedido"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdPedido"));
+
+                    b.Property<decimal>("Descuento")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("descuento");
 
                     b.Property<DateTime>("FechaPedido")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_pedido");
 
                     b.Property<int>("IdCliente")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_cliente");
 
                     b.Property<int>("IdEstadoPedido")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_estado_pedido");
 
                     b.Property<int>("IdMetodoPago")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_metodo_pago");
 
                     b.Property<int>("IdUsuario")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_usuario");
+
+                    b.Property<decimal?>("SubtotalPedido")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("subtotal");
 
                     b.Property<decimal>("TotalPedido")
                         .HasColumnType("decimal(10,2)")
@@ -215,40 +235,40 @@ namespace TritoteNic.Migrations
                 {
                     b.Property<int>("IdProducto")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_producto");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdProducto"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdProducto"));
 
                     b.Property<string>("DescripcionProducto")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("EstadoProducto")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<int>("IdCategoria")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_categoria");
 
                     b.Property<string>("ImagenProducto")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("NombreProducto")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<decimal>("PrecioProducto")
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<int>("StockProducto")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("IdProducto");
 
@@ -261,20 +281,20 @@ namespace TritoteNic.Migrations
                 {
                     b.Property<int>("IdRol")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_rol");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdRol"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdRol"));
 
                     b.Property<string>("DescripcionRol")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("NombreRol")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("IdRol");
 
@@ -285,38 +305,42 @@ namespace TritoteNic.Migrations
                 {
                     b.Property<int>("IdUsuario")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_usuario");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdUsuario"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdUsuario"));
 
                     b.Property<string>("ContrasenaUsuario")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("EmailUsuario")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("EstadoUsuario")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("FechaCreacionUsuario")
-                        .HasColumnType("datetime2")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_creacion");
 
                     b.Property<int>("IdRol")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("id_rol");
 
                     b.Property<string>("NombreUsuario")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("UltimoAcceso")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ultimo_acceso");
 
                     b.HasKey("IdUsuario");
 

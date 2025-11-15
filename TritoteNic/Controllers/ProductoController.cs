@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
@@ -199,6 +200,82 @@ namespace TritoteNic.Controllers
                 _logger.LogError($"Error al eliminar el producto con ID {id}: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     "Se produjo un error al eliminar el producto.");
+            }
+        }
+
+        [HttpPatch("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PatchProducto(int id, JsonPatchDocument<ProductoUpdateDto> patchDto)
+        {
+            if (id <= 0)
+            {
+                _logger.LogError($"ID de Producto no válido: {id}");
+                return BadRequest("ID de Producto no válido.");
+            }
+
+            try
+            {
+                _logger.LogInformation($"Aplicando el parche al producto con ID: {id}");
+
+                var producto = await _context.Productos.FindAsync(id);
+                if (producto == null)
+                {
+                    _logger.LogWarning($"No se encontró ningún producto con ID: {id}");
+                    return NotFound("El producto no se encontró.");
+                }
+
+                var productoDto = _mapper.Map<ProductoUpdateDto>(producto);
+                patchDto.ApplyTo(productoDto, ModelState);
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("El modelo de producto después de aplicar el parche no es válido.");
+                    return BadRequest(ModelState);
+                }
+
+                _mapper.Map(productoDto, producto);
+
+                using (var transaction = await _context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+                        _logger.LogInformation($"Parche aplicado correctamente al producto con ID: {id}");
+                        return NoContent();
+                    }
+                    catch (DbUpdateConcurrencyException ex)
+                    {
+                        transaction.Rollback();
+                        if (!ProductoExiste(id))
+                        {
+                            _logger.LogWarning($"No se encontró ningún producto con ID: {id}");
+                            return NotFound("El producto no se encontró durante la actualización.");
+                        }
+                        else
+                        {
+                            _logger.LogError($"Error de concurrencia al aplicar el parche al producto con ID: {id}. Detalles: {ex.Message}");
+                            return StatusCode(StatusCodes.Status500InternalServerError,
+                                "Error interno del servidor al aplicar el parche al producto.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _logger.LogError($"Error al aplicar el parche al producto con ID {id}: {ex.Message}");
+                        return StatusCode(StatusCodes.Status500InternalServerError,
+                            "Error interno del servidor al aplicar el parche al producto.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al aplicar el parche al producto con ID {id}: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error interno del servidor al aplicar el parche al producto.");
             }
         }
 

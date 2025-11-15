@@ -23,7 +23,13 @@ namespace SharedModels.Dto
         [Required]
         public int IdMetodoPago { get; set; }
 
+        public decimal? SubtotalPedido { get; set; }
+
+        public decimal Descuento { get; set; } = 0;
+
         [Required]
         public decimal TotalPedido { get; set; }
+
+        public List<DetallePedidoCreateDto>? Detalles { get; set; }
     }
 }

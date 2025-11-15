@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using TritoteNic.Data;
@@ -170,6 +171,94 @@ namespace TritoteNic.Controllers
                     return StatusCode(StatusCodes.Status500InternalServerError,
                         "Error interno del servidor al actualizar el usuario.");
                 }
+            }
+        }
+
+        [HttpPatch("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PatchUsuario(int id, JsonPatchDocument<UsuarioUpdateDto> patchDto)
+        {
+            if (id <= 0)
+            {
+                _logger.LogError($"ID de Usuario no válido: {id}");
+                return BadRequest("ID de Usuario no válido.");
+            }
+
+            try
+            {
+                _logger.LogInformation($"Aplicando el parche al usuario con ID: {id}");
+
+                var usuario = await _context.Usuarios.FindAsync(id);
+                if (usuario == null)
+                {
+                    _logger.LogWarning($"No se encontró ningún usuario con ID: {id}");
+                    return NotFound("El usuario no se encontró.");
+                }
+
+                var usuarioDto = _mapper.Map<UsuarioUpdateDto>(usuario);
+                patchDto.ApplyTo(usuarioDto, ModelState);
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("El modelo de usuario después de aplicar el parche no es válido.");
+                    return BadRequest(ModelState);
+                }
+
+                // Validar email único si se está actualizando
+                if (!string.IsNullOrWhiteSpace(usuarioDto.EmailUsuario))
+                {
+                    var emailConflict = await _context.Usuarios
+                        .AnyAsync(u => u.EmailUsuario == usuarioDto.EmailUsuario && u.IdUsuario != id);
+                    if (emailConflict)
+                    {
+                        ModelState.AddModelError("EmailUsuario", "El email ya está en uso por otro usuario.");
+                        return BadRequest(ModelState);
+                    }
+                }
+
+                _mapper.Map(usuarioDto, usuario);
+
+                using (var transaction = await _context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+                        _logger.LogInformation($"Parche aplicado correctamente al usuario con ID: {id}");
+                        return NoContent();
+                    }
+                    catch (DbUpdateConcurrencyException ex)
+                    {
+                        transaction.Rollback();
+                        if (!UsuarioExiste(id))
+                        {
+                            _logger.LogWarning($"No se encontró ningún usuario con ID: {id}");
+                            return NotFound("El usuario no se encontró durante la actualización.");
+                        }
+                        else
+                        {
+                            _logger.LogError($"Error de concurrencia al aplicar el parche al usuario con ID: {id}. Detalles: {ex.Message}");
+                            return StatusCode(StatusCodes.Status500InternalServerError,
+                                "Error interno del servidor al aplicar el parche al usuario.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _logger.LogError($"Error al aplicar el parche al usuario con ID {id}: {ex.Message}");
+                        return StatusCode(StatusCodes.Status500InternalServerError,
+                            "Error interno del servidor al aplicar el parche al usuario.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al aplicar el parche al usuario con ID {id}: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error interno del servidor al aplicar el parche al usuario.");
             }
         }
 

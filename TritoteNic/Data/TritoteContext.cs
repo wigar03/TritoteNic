@@ -18,8 +18,8 @@ namespace TritoteNic.Data
             public DbSet<Usuario> Usuarios { get; set; }
             public DbSet<Rol> Roles { get; set; }
             public DbSet<MetodoPago> MetodosPago { get; set; }
-            public DbSet<DetallePedido> DetallesPedidos { get; set; }
             public DbSet<EstadoPedido> EstadosPedidos { get; set; }
+            public DbSet<Categoria> Categorias { get; set; }
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {

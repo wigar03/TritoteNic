@@ -16,6 +16,7 @@ namespace SharedModels.Dto
         public string? EmailUsuario { get; set; }
         public string? EstadoUsuario { get; set; }
         public DateTime FechaCreacionUsuario { get; set; }
+        public DateTime? UltimoAcceso { get; set; }
         public int IdRol { get; set; }
         public string? NombreRol { get; set; }
     }

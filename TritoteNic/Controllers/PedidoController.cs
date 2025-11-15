@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
@@ -215,6 +216,82 @@ namespace TritoteNic.Controllers
                 _logger.LogError($"Error al eliminar el pedido con ID {id}: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     "Se produjo un error al eliminar el pedido.");
+            }
+        }
+
+        [HttpPatch("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PatchPedido(int id, JsonPatchDocument<PedidoUpdateDto> patchDto)
+        {
+            if (id <= 0)
+            {
+                _logger.LogError($"ID de Pedido no válido: {id}");
+                return BadRequest("ID de Pedido no válido.");
+            }
+
+            try
+            {
+                _logger.LogInformation($"Aplicando el parche al pedido con ID: {id}");
+
+                var pedido = await _context.Pedidos.FindAsync(id);
+                if (pedido == null)
+                {
+                    _logger.LogWarning($"No se encontró ningún pedido con ID: {id}");
+                    return NotFound("El pedido no se encontró.");
+                }
+
+                var pedidoDto = _mapper.Map<PedidoUpdateDto>(pedido);
+                patchDto.ApplyTo(pedidoDto, ModelState);
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("El modelo de pedido después de aplicar el parche no es válido.");
+                    return BadRequest(ModelState);
+                }
+
+                _mapper.Map(pedidoDto, pedido);
+
+                using (var transaction = await _context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+                        _logger.LogInformation($"Parche aplicado correctamente al pedido con ID: {id}");
+                        return NoContent();
+                    }
+                    catch (DbUpdateConcurrencyException ex)
+                    {
+                        transaction.Rollback();
+                        if (!PedidoExiste(id))
+                        {
+                            _logger.LogWarning($"No se encontró ningún pedido con ID: {id}");
+                            return NotFound("El pedido no se encontró durante la actualización.");
+                        }
+                        else
+                        {
+                            _logger.LogError($"Error de concurrencia al aplicar el parche al pedido con ID: {id}. Detalles: {ex.Message}");
+                            return StatusCode(StatusCodes.Status500InternalServerError,
+                                "Error interno del servidor al aplicar el parche al pedido.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        _logger.LogError($"Error al aplicar el parche al pedido con ID {id}: {ex.Message}");
+                        return StatusCode(StatusCodes.Status500InternalServerError,
+                            "Error interno del servidor al aplicar el parche al pedido.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al aplicar el parche al pedido con ID {id}: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error interno del servidor al aplicar el parche al pedido.");
             }
         }
 

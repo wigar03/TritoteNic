@@ -16,5 +16,9 @@ namespace SharedModels.Dto
         public string? TelefonoCliente { get; set; }
         public string? DireccionCliente { get; set; }
         public string? EmailCliente { get; set; }
+        public string? CategoriaCliente { get; set; }
+        public decimal TotalGastado { get; set; }
+        public DateTime? FechaUltimoPedido { get; set; }
+        public int? TotalPedidos { get; set; }
     }
 }
