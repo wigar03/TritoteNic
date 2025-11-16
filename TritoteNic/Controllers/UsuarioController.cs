@@ -113,6 +113,9 @@ namespace TritoteNic.Controllers
                 // Crear el nuevo usuario
                 var nuevoUsuario = _mapper.Map<Usuario>(createDto);
 
+                // Hashear contraseña antes de guardar
+                nuevoUsuario.ContrasenaUsuario = HashPassword(createDto.ContrasenaUsuario!);
+
                 _context.Usuarios.Add(nuevoUsuario);
                 await _context.SaveChangesAsync();
 
@@ -265,6 +268,13 @@ namespace TritoteNic.Controllers
         private bool UsuarioExiste(int id)
         {
             return _context.Usuarios.Any(u => u.IdUsuario == id);
+        }
+
+        private string HashPassword(string password)
+        {
+            using var sha256 = System.Security.Cryptography.SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hashedBytes);
         }
 
         [HttpDelete("{id}")]

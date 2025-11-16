@@ -293,3 +293,7 @@ D:\Git\New folder\TritoteNic\bin\Debug\net9.0\Newtonsoft.Json.dll
 D:\Git\New folder\TritoteNic\bin\Debug\net9.0\Newtonsoft.Json.Bson.dll
 D:\Git\New folder\TritoteNic\bin\Debug\net9.0\Npgsql.dll
 D:\Git\New folder\TritoteNic\bin\Debug\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+D:\Git\New folder\TritoteNic\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Git\New folder\TritoteNic\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+D:\Git\New folder\TritoteNic\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\Git\New folder\TritoteNic\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
