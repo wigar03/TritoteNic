@@ -1,49 +1,52 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Git\\New folder\\TritoteNic\\",
+  "WorkspaceRootPath": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\controllers\\usuariocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\usuariocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\usuariocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BB571911-07A1-4EC9-9DFE-BF96A37389EF}|..\\SharedModels\\SharedModels.csproj|d:\\git\\proyectofinal ii semestre\\sharedmodels\\dto\\logindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\controllers\\categoriacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\categoriacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\categoriacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\controllers\\clientecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\clientecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\controllers\\detallepedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\detallepedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\controllers\\estadopedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\estadopedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\controllers\\metodopagocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\metodopagocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\controllers\\pedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\pedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\pedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\controllers\\productocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\clientecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\clientecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\detallepedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\detallepedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\estadopedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\estadopedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\metodopagocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\metodopagocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\productocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\productocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\controllers\\rolcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\rolcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\rolcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\new folder\\tritotenic\\data\\tritotecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\data\\tritotecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:data\\tritotecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -59,24 +62,25 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Title": "LoginDto.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\Dto\\LoginDto.cs",
+              "RelativeDocumentMoniker": "..\\SharedModels\\Dto\\LoginDto.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\Dto\\LoginDto.cs",
+              "RelativeToolTip": "..\\SharedModels\\Dto\\LoginDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T19:07:58.732Z"
+              "WhenOpened": "2025-11-17T13:10:48.183Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "UsuarioController.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Controllers\\UsuarioController.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\UsuarioController.cs",
               "RelativeDocumentMoniker": "Controllers\\UsuarioController.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Controllers\\UsuarioController.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\UsuarioController.cs",
               "RelativeToolTip": "Controllers\\UsuarioController.cs",
-              "ViewState": "AgIAAK4AAAAAAAAAAAAAAK8AAAAqAAAAAAAAAA==",
+              "ViewState": "AgIAAK4AAAAAAAAAAAAAAK8AAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-13T15:46:56.312Z",
               "EditorCaption": ""
@@ -84,34 +88,10 @@
             {
               "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "MetodoPagoController.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Controllers\\MetodoPagoController.cs",
-              "RelativeDocumentMoniker": "Controllers\\MetodoPagoController.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Controllers\\MetodoPagoController.cs",
-              "RelativeToolTip": "Controllers\\MetodoPagoController.cs",
-              "ViewState": "AgIAAKgAAAAAAAAAAAAowM8AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:54:55.744Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "EstadoPedidoController.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Controllers\\EstadoPedidoController.cs",
-              "RelativeDocumentMoniker": "Controllers\\EstadoPedidoController.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Controllers\\EstadoPedidoController.cs",
-              "RelativeToolTip": "Controllers\\EstadoPedidoController.cs",
-              "ViewState": "AgIAAJ8AAAAAAAAAAAAlwAEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:55:11.46Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
               "Title": "DetallePedidoController.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Controllers\\DetallePedidoController.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\DetallePedidoController.cs",
               "RelativeDocumentMoniker": "Controllers\\DetallePedidoController.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Controllers\\DetallePedidoController.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\DetallePedidoController.cs",
               "RelativeToolTip": "Controllers\\DetallePedidoController.cs",
               "ViewState": "AgIAAPIAAAAAAAAAAAAAAAUBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -119,11 +99,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "ClienteController.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Controllers\\ClienteController.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\ClienteController.cs",
               "RelativeDocumentMoniker": "Controllers\\ClienteController.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Controllers\\ClienteController.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\ClienteController.cs",
               "RelativeToolTip": "Controllers\\ClienteController.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAvwAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -133,33 +113,69 @@
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "CategoriaController.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Controllers\\CategoriaController.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\CategoriaController.cs",
               "RelativeDocumentMoniker": "Controllers\\CategoriaController.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Controllers\\CategoriaController.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\CategoriaController.cs",
               "RelativeToolTip": "Controllers\\CategoriaController.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAvwAEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-13T17:56:40.934Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 3,
               "Title": "PedidoController.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Controllers\\PedidoController.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\PedidoController.cs",
               "RelativeDocumentMoniker": "Controllers\\PedidoController.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Controllers\\PedidoController.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\PedidoController.cs",
               "RelativeToolTip": "Controllers\\PedidoController.cs",
-              "ViewState": "AgIAANAAAAAAAAAAAAAAAKkAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAMoAAAAAAAAAAAAqwKkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-13T17:54:35.29Z"
             },
             {
               "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "EstadoPedidoController.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\EstadoPedidoController.cs",
+              "RelativeDocumentMoniker": "Controllers\\EstadoPedidoController.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\EstadoPedidoController.cs",
+              "RelativeToolTip": "Controllers\\EstadoPedidoController.cs",
+              "ViewState": "AgIAAJ8AAAAAAAAAAAAlwAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-13T17:55:11.46Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 8,
+              "Title": "MetodoPagoController.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\MetodoPagoController.cs",
+              "RelativeDocumentMoniker": "Controllers\\MetodoPagoController.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\MetodoPagoController.cs",
+              "RelativeToolTip": "Controllers\\MetodoPagoController.cs",
+              "ViewState": "AgIAAKgAAAAAAAAAAAAowM8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-13T17:54:55.744Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-13T19:07:58.732Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "ProductoController.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Controllers\\ProductoController.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\ProductoController.cs",
               "RelativeDocumentMoniker": "Controllers\\ProductoController.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Controllers\\ProductoController.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\ProductoController.cs",
               "RelativeToolTip": "Controllers\\ProductoController.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAvwAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -167,11 +183,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "RolController.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Controllers\\RolController.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\RolController.cs",
               "RelativeDocumentMoniker": "Controllers\\RolController.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Controllers\\RolController.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\RolController.cs",
               "RelativeToolTip": "Controllers\\RolController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAEQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -179,11 +195,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "TritoteContext.cs",
-              "DocumentMoniker": "D:\\Git\\New folder\\TritoteNic\\Data\\TritoteContext.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Data\\TritoteContext.cs",
               "RelativeDocumentMoniker": "Data\\TritoteContext.cs",
-              "ToolTip": "D:\\Git\\New folder\\TritoteNic\\Data\\TritoteContext.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Data\\TritoteContext.cs",
               "RelativeToolTip": "Data\\TritoteContext.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",

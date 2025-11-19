@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
 using SharedModels.Dto;
 using TritoteNic.Data;
+using System.Linq;
 
 namespace TritoteNic.Controllers
 {
@@ -32,8 +33,28 @@ namespace TritoteNic.Controllers
             try
             {
                 _logger.LogInformation("Obteniendo los Clientes");
-                var clientes = await _context.Clientes.ToListAsync();
-                return Ok(_mapper.Map<IEnumerable<ClienteDto>>(clientes));
+                var clientes = await _context.Clientes
+                    .Include(c => c.Pedidos)
+                    .ToListAsync();
+
+                var clientesDto = _mapper.Map<IEnumerable<ClienteDto>>(clientes);
+
+                // Calcular automáticamente TotalGastado, TotalPedidos y FechaUltimoPedido
+                foreach (var cliente in clientes)
+                {
+                    var clienteDto = clientesDto.FirstOrDefault(c => c.IdCliente == cliente.IdCliente);
+                    if (clienteDto != null)
+                    {
+                        // Calcular desde los pedidos reales en la BD
+                        clienteDto.TotalGastado = cliente.Pedidos?.Sum(p => p.TotalPedido) ?? 0;
+                        clienteDto.TotalPedidos = cliente.Pedidos?.Count ?? 0;
+                        clienteDto.FechaUltimoPedido = cliente.Pedidos?.Any() == true
+                            ? cliente.Pedidos.Max(p => p.FechaPedido)
+                            : null;
+                    }
+                }
+
+                return Ok(clientesDto);
             }
             catch (Exception ex)
             {
@@ -59,7 +80,9 @@ namespace TritoteNic.Controllers
             try
             {
                 _logger.LogInformation($"Obteniendo Cliente con ID: {id}");
-                var cliente = await _context.Clientes.FindAsync(id);
+                var cliente = await _context.Clientes
+                    .Include(c => c.Pedidos)
+                    .FirstOrDefaultAsync(c => c.IdCliente == id);
 
                 if (cliente == null)
                 {
@@ -67,7 +90,16 @@ namespace TritoteNic.Controllers
                     return NotFound("Cliente no encontrado.");
                 }
 
-                return Ok(_mapper.Map<ClienteDto>(cliente));
+                var clienteDto = _mapper.Map<ClienteDto>(cliente);
+                
+                // Calcular automáticamente TotalGastado, TotalPedidos y FechaUltimoPedido
+                clienteDto.TotalGastado = cliente.Pedidos?.Sum(p => p.TotalPedido) ?? 0;
+                clienteDto.TotalPedidos = cliente.Pedidos?.Count ?? 0;
+                clienteDto.FechaUltimoPedido = cliente.Pedidos?.Any() == true
+                    ? cliente.Pedidos.Max(p => p.FechaPedido)
+                    : null;
+
+                return Ok(clienteDto);
             }
             catch (Exception ex)
             {

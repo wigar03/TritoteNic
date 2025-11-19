@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+g1rmrB2fZQ=",
+  "dgSpecHash": "0dau6U4h1mk=",
   "success": true,
-  "projectFilePath": "D:\\Git\\New folder\\TritoteNic\\TritoteNic.csproj",
+  "projectFilePath": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\TritoteNic.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\wigar\\.nuget\\packages\\automapper\\15.1.0\\automapper.15.1.0.nupkg.sha512",
     "C:\\Users\\wigar\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
@@ -73,9 +73,9 @@
       "code": "NU1608",
       "level": "Warning",
       "message": "Detected package version outside of dependency constraint: AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.1 requires AutoMapper (= 12.0.1) but version AutoMapper 15.1.0 was resolved.",
-      "projectPath": "D:\\Git\\New folder\\TritoteNic\\TritoteNic.csproj",
+      "projectPath": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\TritoteNic.csproj",
       "warningLevel": 1,
-      "filePath": "D:\\Git\\New folder\\TritoteNic\\TritoteNic.csproj",
+      "filePath": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\TritoteNic.csproj",
       "libraryId": "AutoMapper",
       "targetGraphs": [
         "net9.0"

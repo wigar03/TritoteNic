@@ -41,11 +41,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Git\\New folder\\SharedModels\\SharedModels.csproj",
+      "projectUniqueName": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\SharedModels.csproj",
       "projectName": "SharedModels",
-      "projectPath": "D:\\Git\\New folder\\SharedModels\\SharedModels.csproj",
+      "projectPath": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\SharedModels.csproj",
       "packagesPath": "C:\\Users\\wigar\\.nuget\\packages\\",
-      "outputPath": "D:\\Git\\New folder\\SharedModels\\obj\\",
+      "outputPath": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

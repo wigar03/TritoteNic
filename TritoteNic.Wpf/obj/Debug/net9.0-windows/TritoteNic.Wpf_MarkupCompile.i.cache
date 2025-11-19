@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-d:\Git\ProyectoFinal II Semestre\TritoteNic.Wpf\obj\Debug\net9.0-windows\
+D:\Git\ProyectoFinal II Semestre\TritoteNic.Wpf\obj\Debug\net9.0-windows\
 TritoteNic.Wpf
 none
 false
 TRACE;DEBUG;NET;NET9_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
-d:\Git\ProyectoFinal II Semestre\TritoteNic.Wpf\App.xaml
+D:\Git\ProyectoFinal II Semestre\TritoteNic.Wpf\App.xaml
 11407045341
 
 6-1135483227
-2011585366170
+2011077293873
 MainWindow.xaml;
 
-True
+False
 

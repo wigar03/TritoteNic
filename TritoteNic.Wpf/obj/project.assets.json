@@ -59,11 +59,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Git\\New folder\\TritoteNic.Wpf\\TritoteNic.Wpf.csproj",
+      "projectUniqueName": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic.Wpf\\TritoteNic.Wpf.csproj",
       "projectName": "TritoteNic.Wpf",
-      "projectPath": "D:\\Git\\New folder\\TritoteNic.Wpf\\TritoteNic.Wpf.csproj",
+      "projectPath": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic.Wpf\\TritoteNic.Wpf.csproj",
       "packagesPath": "C:\\Users\\wigar\\.nuget\\packages\\",
-      "outputPath": "D:\\Git\\New folder\\TritoteNic.Wpf\\obj\\",
+      "outputPath": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic.Wpf\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -84,8 +84,8 @@
         "net9.0-windows7.0": {
           "targetAlias": "net9.0-windows",
           "projectReferences": {
-            "D:\\Git\\New folder\\SharedModels\\SharedModels.csproj": {
-              "projectPath": "D:\\Git\\New folder\\SharedModels\\SharedModels.csproj"
+            "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\SharedModels.csproj": {
+              "projectPath": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\SharedModels.csproj"
             }
           }
         }

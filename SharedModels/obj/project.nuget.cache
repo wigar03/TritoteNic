@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "gKM7OEcE6W8=",
+  "dgSpecHash": "CQW/IeYU7aQ=",
   "success": true,
-  "projectFilePath": "D:\\Git\\New folder\\SharedModels\\SharedModels.csproj",
+  "projectFilePath": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\SharedModels.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\wigar\\.nuget\\packages\\swashbuckle.aspnetcore\\9.0.0\\swashbuckle.aspnetcore.9.0.0.nupkg.sha512"
   ],

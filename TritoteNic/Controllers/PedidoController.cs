@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
 using SharedModels.Dto;
 using TritoteNic.Data;
+using System.Linq;
 
 namespace TritoteNic.Controllers
 {
@@ -32,8 +33,45 @@ namespace TritoteNic.Controllers
             try
             {
                 _logger.LogInformation("Obteniendo los Pedidos");
-                var pedidos = await _context.Pedidos.ToListAsync();
-                return Ok(_mapper.Map<IEnumerable<PedidoDto>>(pedidos));
+                var pedidos = await _context.Pedidos
+                    .Include(p => p.Cliente)
+                    .Include(p => p.Usuario)
+                    .Include(p => p.EstadoPedido)
+                    .Include(p => p.MetodoPago)
+                    .Include(p => p.Detalles)
+                        .ThenInclude(d => d.Producto)
+                    .ToListAsync();
+
+                var pedidosDto = _mapper.Map<IEnumerable<PedidoDto>>(pedidos);
+                
+                // Mapear información adicional
+                foreach (var pedido in pedidos)
+                {
+                    var pedidoDto = pedidosDto.FirstOrDefault(p => p.IdPedido == pedido.IdPedido);
+                    if (pedidoDto != null)
+                    {
+                        pedidoDto.NombreCliente = pedido.Cliente?.NombreCliente;
+                        pedidoDto.NombreUsuario = pedido.Usuario?.NombreUsuario;
+                        pedidoDto.NombreEstadoPedido = pedido.EstadoPedido?.NombreEstadoPedido;
+                        pedidoDto.NombreMetodoPago = pedido.MetodoPago?.NombreMetodoPago;
+                        
+                        if (pedido.Detalles != null && pedido.Detalles.Any())
+                        {
+                            pedidoDto.Detalles = pedido.Detalles.Select(d => new DetallePedidoDto
+                            {
+                                IdDetalle = d.IdDetalle,
+                                IdPedido = d.IdPedido,
+                                IdProducto = d.IdProducto,
+                                NombreProducto = d.Producto?.NombreProducto,
+                                CantidadProducto = d.CantidadProducto,
+                                PrecioUnitarioProducto = d.PrecioUnitarioProducto,
+                                SubtotalProducto = d.SubtotalProducto
+                            }).ToList();
+                        }
+                    }
+                }
+
+                return Ok(pedidosDto);
             }
             catch (Exception ex)
             {
@@ -59,7 +97,14 @@ namespace TritoteNic.Controllers
             try
             {
                 _logger.LogInformation($"Obteniendo Pedido con ID: {id}");
-                var pedido = await _context.Pedidos.FindAsync(id);
+                var pedido = await _context.Pedidos
+                    .Include(p => p.Cliente)
+                    .Include(p => p.Usuario)
+                    .Include(p => p.EstadoPedido)
+                    .Include(p => p.MetodoPago)
+                    .Include(p => p.Detalles)
+                        .ThenInclude(d => d.Producto)
+                    .FirstOrDefaultAsync(p => p.IdPedido == id);
 
                 if (pedido == null)
                 {
@@ -67,7 +112,29 @@ namespace TritoteNic.Controllers
                     return NotFound("Pedido no encontrado.");
                 }
 
-                return Ok(_mapper.Map<PedidoDto>(pedido));
+                var pedidoDto = _mapper.Map<PedidoDto>(pedido);
+                
+                // Mapear información adicional
+                pedidoDto.NombreCliente = pedido.Cliente?.NombreCliente;
+                pedidoDto.NombreUsuario = pedido.Usuario?.NombreUsuario;
+                pedidoDto.NombreEstadoPedido = pedido.EstadoPedido?.NombreEstadoPedido;
+                pedidoDto.NombreMetodoPago = pedido.MetodoPago?.NombreMetodoPago;
+                
+                if (pedido.Detalles != null && pedido.Detalles.Any())
+                {
+                    pedidoDto.Detalles = pedido.Detalles.Select(d => new DetallePedidoDto
+                    {
+                        IdDetalle = d.IdDetalle,
+                        IdPedido = d.IdPedido,
+                        IdProducto = d.IdProducto,
+                        NombreProducto = d.Producto?.NombreProducto,
+                        CantidadProducto = d.CantidadProducto,
+                        PrecioUnitarioProducto = d.PrecioUnitarioProducto,
+                        SubtotalProducto = d.SubtotalProducto
+                    }).ToList();
+                }
+
+                return Ok(pedidoDto);
             }
             catch (Exception ex)
             {
@@ -100,38 +167,203 @@ namespace TritoteNic.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Opcional: Validaciones de FKs (evita errores de integridad)
-                var fkMissing = false;
-                if (!await _context.Clientes.AnyAsync(c => c.IdCliente == createDto.IdCliente))
+                // Validar descuento (0-100%)
+                if (createDto.Descuento < 0 || createDto.Descuento > 100)
+                {
+                    ModelState.AddModelError("Descuento", "El descuento debe estar entre 0 y 100.");
+                    return BadRequest(ModelState);
+                }
+
+                // Validar FKs
+                var cliente = await _context.Clientes.FindAsync(createDto.IdCliente);
+                if (cliente == null)
                 {
                     ModelState.AddModelError("IdCliente", "El cliente no existe.");
-                    fkMissing = true;
+                    return BadRequest(ModelState);
                 }
+
                 if (!await _context.Usuarios.AnyAsync(u => u.IdUsuario == createDto.IdUsuario))
                 {
                     ModelState.AddModelError("IdUsuario", "El usuario no existe.");
-                    fkMissing = true;
+                    return BadRequest(ModelState);
                 }
+
                 if (!await _context.EstadosPedidos.AnyAsync(e => e.IdEstadoPedido == createDto.IdEstadoPedido))
                 {
                     ModelState.AddModelError("IdEstadoPedido", "El estado de pedido no existe.");
-                    fkMissing = true;
+                    return BadRequest(ModelState);
                 }
+
                 if (!await _context.MetodosPago.AnyAsync(m => m.IdMetodoPago == createDto.IdMetodoPago))
                 {
                     ModelState.AddModelError("IdMetodoPago", "El método de pago no existe.");
-                    fkMissing = true;
+                    return BadRequest(ModelState);
                 }
-                if (fkMissing) return BadRequest(ModelState);
 
-                // Crear el nuevo pedido
-                var pedido = _mapper.Map<Pedido>(createDto);
+                // Validar y procesar detalles del pedido
+                if (createDto.Detalles == null || !createDto.Detalles.Any())
+                {
+                    ModelState.AddModelError("Detalles", "El pedido debe tener al menos un detalle.");
+                    return BadRequest(ModelState);
+                }
+
+                decimal subtotalPedido = 0;
+                var detallesAProcesar = new List<DetallePedido>();
+
+                // Validar stock y calcular subtotal
+                foreach (var detalleDto in createDto.Detalles)
+                {
+                    var producto = await _context.Productos.FindAsync(detalleDto.IdProducto);
+                    if (producto == null)
+                    {
+                        ModelState.AddModelError("Detalles", $"El producto con ID {detalleDto.IdProducto} no existe.");
+                        return BadRequest(ModelState);
+                    }
+
+                    // Validar stock
+                    if (producto.StockProducto < detalleDto.CantidadProducto)
+                    {
+                        ModelState.AddModelError("Detalles", 
+                            $"Stock insuficiente para el producto {producto.NombreProducto}. Stock disponible: {producto.StockProducto}, solicitado: {detalleDto.CantidadProducto}");
+                        return BadRequest(ModelState);
+                    }
+
+                    // Calcular subtotal si no viene
+                    decimal subtotalDetalle;
+                    if (detalleDto.SubtotalProducto > 0)
+                    {
+                        subtotalDetalle = detalleDto.SubtotalProducto;
+                    }
+                    else
+                    {
+                        subtotalDetalle = detalleDto.CantidadProducto * detalleDto.PrecioUnitarioProducto;
+                    }
+
+                    subtotalPedido += subtotalDetalle;
+
+                    var detalle = new DetallePedido
+                    {
+                        IdProducto = detalleDto.IdProducto,
+                        CantidadProducto = detalleDto.CantidadProducto,
+                        PrecioUnitarioProducto = detalleDto.PrecioUnitarioProducto,
+                        SubtotalProducto = subtotalDetalle
+                    };
+
+                    detallesAProcesar.Add(detalle);
+                }
+
+                // Calcular SubtotalPedido si no viene
+                if (createDto.SubtotalPedido == null || createDto.SubtotalPedido == 0)
+                {
+                    createDto.SubtotalPedido = subtotalPedido;
+                }
+
+                // Calcular TotalPedido aplicando descuento
+                decimal totalPedido;
+                if (createDto.TotalPedido > 0)
+                {
+                    totalPedido = createDto.TotalPedido;
+                }
+                else
+                {
+                    var subtotal = createDto.SubtotalPedido ?? subtotalPedido;
+                    var descuento = createDto.Descuento / 100m;
+                    totalPedido = subtotal * (1 - descuento);
+                }
+
+                // Crear el pedido
+                var pedido = new Pedido
+                {
+                    IdCliente = createDto.IdCliente,
+                    IdUsuario = createDto.IdUsuario,
+                    IdEstadoPedido = createDto.IdEstadoPedido,
+                    IdMetodoPago = createDto.IdMetodoPago,
+                    FechaPedido = DateTime.Now,
+                    SubtotalPedido = createDto.SubtotalPedido ?? subtotalPedido,
+                    Descuento = createDto.Descuento,
+                    TotalPedido = totalPedido,
+                    Detalles = detallesAProcesar
+                };
+
+                // Actualizar stock de productos
+                foreach (var detalle in detallesAProcesar)
+                {
+                    var producto = await _context.Productos.FindAsync(detalle.IdProducto);
+                    if (producto != null)
+                    {
+                        producto.StockProducto -= detalle.CantidadProducto;
+                        if (producto.StockProducto < 0)
+                        {
+                            producto.StockProducto = 0;
+                        }
+                    }
+                }
+
+                // Actualizar cliente
+                cliente.TotalGastado += totalPedido;
+                cliente.FechaUltimoPedido = DateTime.Now;
+
+                // Actualizar categoría del cliente
+                if (cliente.TotalGastado >= 100000)
+                {
+                    cliente.CategoriaCliente = "VIP";
+                }
+                else if (cliente.TotalGastado >= 50000)
+                {
+                    cliente.CategoriaCliente = "Frecuente";
+                }
+                else if (cliente.TotalGastado > 0)
+                {
+                    cliente.CategoriaCliente = "Regular";
+                }
+                else
+                {
+                    cliente.CategoriaCliente = null;
+                }
 
                 _context.Pedidos.Add(pedido);
                 await _context.SaveChangesAsync();
 
+                // Cargar relaciones para el DTO
+                await _context.Entry(pedido)
+                    .Reference(p => p.Cliente).LoadAsync();
+                await _context.Entry(pedido)
+                    .Reference(p => p.Usuario).LoadAsync();
+                await _context.Entry(pedido)
+                    .Reference(p => p.EstadoPedido).LoadAsync();
+                await _context.Entry(pedido)
+                    .Reference(p => p.MetodoPago).LoadAsync();
+                await _context.Entry(pedido)
+                    .Collection(p => p.Detalles).LoadAsync();
+
+                foreach (var detalle in pedido.Detalles)
+                {
+                    await _context.Entry(detalle)
+                        .Reference(d => d.Producto).LoadAsync();
+                }
+
+                var pedidoDto = _mapper.Map<PedidoDto>(pedido);
+                pedidoDto.NombreCliente = pedido.Cliente?.NombreCliente;
+                pedidoDto.NombreUsuario = pedido.Usuario?.NombreUsuario;
+                pedidoDto.NombreEstadoPedido = pedido.EstadoPedido?.NombreEstadoPedido;
+                pedidoDto.NombreMetodoPago = pedido.MetodoPago?.NombreMetodoPago;
+                
+                if (pedido.Detalles != null && pedido.Detalles.Any())
+                {
+                    pedidoDto.Detalles = pedido.Detalles.Select(d => new DetallePedidoDto
+                    {
+                        IdDetalle = d.IdDetalle,
+                        IdPedido = d.IdPedido,
+                        IdProducto = d.IdProducto,
+                        NombreProducto = d.Producto?.NombreProducto,
+                        CantidadProducto = d.CantidadProducto,
+                        PrecioUnitarioProducto = d.PrecioUnitarioProducto,
+                        SubtotalProducto = d.SubtotalProducto
+                    }).ToList();
+                }
+
                 _logger.LogInformation($"Nuevo pedido creado con ID: {pedido.IdPedido}");
-                return CreatedAtAction(nameof(GetPedido), new { id = pedido.IdPedido }, _mapper.Map<PedidoDto>(pedido));
+                return CreatedAtAction(nameof(GetPedido), new { id = pedido.IdPedido }, pedidoDto);
             }
             catch (Exception ex)
             {

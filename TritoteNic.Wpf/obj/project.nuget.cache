@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "zkeNb2INLS4=",
+  "dgSpecHash": "qz4d/eF5joE=",
   "success": true,
-  "projectFilePath": "D:\\Git\\New folder\\TritoteNic.Wpf\\TritoteNic.Wpf.csproj",
+  "projectFilePath": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic.Wpf\\TritoteNic.Wpf.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\wigar\\.nuget\\packages\\swashbuckle.aspnetcore\\9.0.0\\swashbuckle.aspnetcore.9.0.0.nupkg.sha512"
   ],
