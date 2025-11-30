@@ -1,0 +1,9 @@
+C:\Users\PC\source\repos\TritoteNic_test\TritoteNic_test\obj\Debug\net8.0-windows\Window3.baml
+C:\Users\PC\source\repos\TritoteNic_test\TritoteNic_test\obj\Debug\net8.0-windows\Login.g.cs
+C:\Users\PC\source\repos\TritoteNic_test\TritoteNic_test\obj\Debug\net8.0-windows\Window1.g.cs
+C:\Users\PC\source\repos\TritoteNic_test\TritoteNic_test\obj\Debug\net8.0-windows\Window2.g.cs
+C:\Users\PC\source\repos\TritoteNic_test\TritoteNic_test\obj\Debug\net8.0-windows\Window3.g.cs
+C:\Users\PC\source\repos\TritoteNic_test\TritoteNic_test\obj\Debug\net8.0-windows\MainWindow.g.cs
+C:\Users\PC\source\repos\TritoteNic_test\TritoteNic_test\obj\Debug\net8.0-windows\App.g.cs
+C:\Users\PC\source\repos\TritoteNic_test\TritoteNic_test\obj\Debug\net8.0-windows\TritoteNic_test_MarkupCompile.cache
+C:\Users\PC\source\repos\TritoteNic_test\TritoteNic_test\obj\Debug\net8.0-windows\TritoteNic_test_MarkupCompile.lref

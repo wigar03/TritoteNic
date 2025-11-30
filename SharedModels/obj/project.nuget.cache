@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "CQW/IeYU7aQ=",
+  "dgSpecHash": "7ObxDgXovdU=",
   "success": true,
-  "projectFilePath": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\SharedModels.csproj",
+  "projectFilePath": "C:\\Users\\PC\\OneDrive\\Documentos\\GitHub\\TritoteNic\\SharedModels\\SharedModels.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\wigar\\.nuget\\packages\\swashbuckle.aspnetcore\\9.0.0\\swashbuckle.aspnetcore.9.0.0.nupkg.sha512"
+    "C:\\Users\\PC\\.nuget\\packages\\swashbuckle.aspnetcore\\9.0.0\\swashbuckle.aspnetcore.9.0.0.nupkg.sha512"
   ],
   "logs": []
 }

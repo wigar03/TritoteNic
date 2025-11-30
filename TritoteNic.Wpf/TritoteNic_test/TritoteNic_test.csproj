@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Page Include="C:\Users\PC\OneDrive\Desktop\MainWindow.xaml" Link="MainWindow.xaml" />
+    <Page Include="C:\Users\PC\OneDrive\Desktop\TritoteNic\Window1.xaml" Link="Window1.xaml" />
+  </ItemGroup>
+
+</Project>
