@@ -2,22 +2,22 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <Compile Update="Window1.xaml.cs">
+    <Compile Update="Pedidos.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Window2.xaml.cs">
+    <Compile Update="NuevoPedido.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Window3.xaml.cs">
+    <Compile Update="DetallePedido.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Window4.xaml.cs">
+    <Compile Update="NuevoPedido2.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Window5.xaml.cs">
+    <Compile Update="NuevoPedido3.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Window6.xaml.cs">
+    <Compile Update="Productos.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
