@@ -1,0 +1,157 @@
+﻿<Window x:Class="TritoteNic.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Gestión de Pedidos" 
+        WindowStartupLocation="CenterScreen"
+        Height="900" Width="1600"
+        Background="#F5F6FA">
+
+    <Window.Resources>
+
+        <Style x:Key="MenuButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#444"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6">
+                            <ContentPresenter Margin="10,5"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E0E0E0"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#CFCFCF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <!-- Sidebar -->
+            <ColumnDefinition Width="*"/>
+            <!-- Contenido -->
+        </Grid.ColumnDefinitions>
+
+        <!-- ▬▬▬▬▬▬▬▬▬▬▬▬▬▬ LEFT SIDEBAR ▬▬▬▬▬▬▬▬▬▬▬▬▬▬ -->
+        <Border Background="White" CornerRadius="12" Padding="20" Margin="0 0 20 0">
+            <StackPanel>
+                <TextBlock Text="Tritote Nicaragua" FontSize="20" FontWeight="SemiBold"/>
+
+                <TextBlock Text="Sistema de Gestión"
+                           Margin="0,4,0,20"
+                           Foreground="#777"/>
+
+                <Separator/>
+
+                <Button Content="Dashboard" Style="{StaticResource MenuButtonStyle}" />
+                <Button Content="Pedidos" Style="{StaticResource MenuButtonStyle}" />
+                <Button Content="Productos" Style="{StaticResource MenuButtonStyle}" />
+                <Button Content="Clientes" Style="{StaticResource MenuButtonStyle}" />
+                <Button Content="Reportes" Style="{StaticResource MenuButtonStyle}" />
+                <Button Content="Usuarios" Style="{StaticResource MenuButtonStyle}" />
+
+                <StackPanel VerticalAlignment="Bottom" Margin="0,150,0,0">
+                    <Separator/>
+                    <TextBlock Text="Laura González" FontSize="14" Margin="0,10,0,0"/>
+                    <TextBlock Text="Administrador" FontSize="12" Foreground="#777"/>
+
+                    <Button Content="Cerrar sesión"
+                            Margin="0,20,0,0"
+                            Background="#EEE"
+                            BorderThickness="0"
+                            Padding="8"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- ▬▬▬▬▬▬▬▬▬▬▬▬▬▬ MAIN CONTENT ▬▬▬▬▬▬▬▬▬▬▬▬▬▬ -->
+        <StackPanel Grid.Column="1">
+
+            <!-- Título -->
+            <TextBlock Text="Gestión de Pedidos" 
+                       FontSize="28" 
+                       FontWeight="Bold"/>
+            <TextBlock Text="Administra y monitorea todos los pedidos"
+                       Foreground="#777"
+                       Margin="0,0,0,25"/>
+
+            <!-- Barra de búsqueda -->
+            <DockPanel Margin="0 0 0 20">
+                <TextBox Width="450" Height="38"
+                         Margin="0,0,20,0"
+                         Padding="10"
+                         Background="White"
+                         BorderBrush="#DDD"
+                         FontSize="14"
+                         Text="Buscar por cliente o número..." />
+
+                <ComboBox Width="180"
+                          Height="38"
+                          SelectedIndex="0">
+                    <ComboBoxItem Content="Todos los estados"/>
+                    <ComboBoxItem Content="Pendiente"/>
+                    <ComboBoxItem Content="En proceso"/>
+                    <ComboBoxItem Content="Completado"/>
+                    <ComboBoxItem Content="Retrasado"/>
+                </ComboBox>
+
+                <Button Content="Nuevo Pedido"
+                        Background="#4CAF50"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        Height="38"
+                        Padding="15,0"
+                        HorizontalAlignment="Right"
+                        Margin="20,0,0,0"/>
+            </DockPanel>
+
+            <!-- Tabla -->
+            <Border Background="White" CornerRadius="12" Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Pedidos (8)"
+                               FontWeight="Bold"
+                               FontSize="18"
+                               Margin="0,0,0,10"/>
+
+                    <ListView Grid.Row="1" Name="PedidosTabla">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Nº Pedido" Width="120" DisplayMemberBinding="{Binding Numero}"/>
+                                <GridViewColumn Header="Cliente" Width="200" DisplayMemberBinding="{Binding Cliente}"/>
+                                <GridViewColumn Header="Fecha" Width="150" DisplayMemberBinding="{Binding Fecha}"/>
+                                <GridViewColumn Header="Estado" Width="150" DisplayMemberBinding="{Binding Estado}"/>
+                                <GridViewColumn Header="Total" Width="150" DisplayMemberBinding="{Binding Total}"/>
+                                <GridViewColumn Header="Método" Width="150" DisplayMemberBinding="{Binding Metodo}"/>
+                                <GridViewColumn Header="Acciones" Width="100" DisplayMemberBinding="{Binding Accion}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                </Grid>
+            </Border>
+        </StackPanel>
+
+    </Grid>
+</Window>
