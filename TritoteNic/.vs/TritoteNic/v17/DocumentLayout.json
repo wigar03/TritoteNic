@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\pedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\pedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\usuariocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\usuariocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -12,10 +16,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\categoriacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\categoriacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\controllers\\pedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|solutionrelative:controllers\\pedidocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{5312D817-1952-4A56-AB81-194A59785EF5}|TritoteNic.csproj|d:\\git\\proyectofinal ii semestre\\tritotenic\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -57,24 +57,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "LoginDto.cs",
-              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\Dto\\LoginDto.cs",
-              "RelativeDocumentMoniker": "..\\SharedModels\\Dto\\LoginDto.cs",
-              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\Dto\\LoginDto.cs",
-              "RelativeToolTip": "..\\SharedModels\\Dto\\LoginDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-17T13:10:48.183Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
               "Title": "UsuarioController.cs",
               "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\UsuarioController.cs",
               "RelativeDocumentMoniker": "Controllers\\UsuarioController.cs",
@@ -82,8 +69,7 @@
               "RelativeToolTip": "Controllers\\UsuarioController.cs",
               "ViewState": "AgIAAK4AAAAAAAAAAAAAAK8AAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T15:46:56.312Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-13T15:46:56.312Z"
             },
             {
               "$type": "Document",
@@ -111,7 +97,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "CategoriaController.cs",
               "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\CategoriaController.cs",
               "RelativeDocumentMoniker": "Controllers\\CategoriaController.cs",
@@ -123,15 +109,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
               "Title": "PedidoController.cs",
               "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\PedidoController.cs",
               "RelativeDocumentMoniker": "Controllers\\PedidoController.cs",
               "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\TritoteNic\\Controllers\\PedidoController.cs",
               "RelativeToolTip": "Controllers\\PedidoController.cs",
-              "ViewState": "AgIAAMoAAAAAAAAAAAAqwKkAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAANgBAAAAAAAAAAAuwKkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T17:54:35.29Z"
+              "WhenOpened": "2025-11-13T17:54:35.29Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "LoginDto.cs",
+              "DocumentMoniker": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\Dto\\LoginDto.cs",
+              "RelativeDocumentMoniker": "..\\SharedModels\\Dto\\LoginDto.cs",
+              "ToolTip": "D:\\Git\\ProyectoFinal II Semestre\\SharedModels\\Dto\\LoginDto.cs",
+              "RelativeToolTip": "..\\SharedModels\\Dto\\LoginDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-17T13:10:48.183Z"
             },
             {
               "$type": "Document",

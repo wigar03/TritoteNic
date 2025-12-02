@@ -13,10 +13,10 @@ namespace SharedModels.Clases
         public int IdProducto { get; set; }
 
         [Required, StringLength(100)]
-        public string NombreProducto { get; set; }
+        public string? NombreProducto { get; set; }
 
         [StringLength(255)]
-        public string DescripcionProducto { get; set; }
+        public string? DescripcionProducto { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]
@@ -30,13 +30,13 @@ namespace SharedModels.Clases
         [Column("id_categoria")]
         public int IdCategoria { get; set; }
 
-        public Categoria Categoria { get; set; }
+        public Categoria? Categoria { get; set; }
 
         [Required, StringLength(20)]
-        public string EstadoProducto { get; set; } // Activo / Inactivo
+        public string? EstadoProducto { get; set; } // Activo / Inactivo
 
         [StringLength(255)]
-        public string ImagenProducto { get; set; }
+        public string? ImagenProducto { get; set; }
 
         public ICollection<DetallePedido> DetallesPedido { get; set; } = new List<DetallePedido>();
     }

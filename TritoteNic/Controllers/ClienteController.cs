@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -6,23 +7,31 @@ using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
 using SharedModels.Dto;
 using TritoteNic.Data;
+using TritoteNic.Services;
 using System.Linq;
 
 namespace TritoteNic.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminOrVendedor")]
     public class ClienteController : ControllerBase
     {
         private readonly TritoteContext.TritoteConext _context;
         private readonly ILogger<ClienteController> _logger;
         private readonly IMapper _mapper;
+        private readonly IClienteService _clienteService;
 
-        public ClienteController(TritoteContext.TritoteConext context, ILogger<ClienteController> logger, IMapper mapper)
+        public ClienteController(
+            TritoteContext.TritoteConext context, 
+            ILogger<ClienteController> logger, 
+            IMapper mapper,
+            IClienteService clienteService)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _clienteService = clienteService;
         }
 
         [HttpGet]
@@ -33,34 +42,104 @@ namespace TritoteNic.Controllers
             try
             {
                 _logger.LogInformation("Obteniendo los Clientes");
-                var clientes = await _context.Clientes
-                    .Include(c => c.Pedidos)
-                    .ToListAsync();
+                
+                List<Cliente> clientes;
+                try
+                {
+                    clientes = await _context.Clientes
+                        .Include(c => c.Pedidos)
+                        .ToListAsync();
+                    _logger.LogInformation($"Se encontraron {clientes.Count} clientes");
+                }
+                catch (Exception dbEx)
+                {
+                    _logger.LogError($"Error al consultar la base de datos: {dbEx.Message}");
+                    _logger.LogError($"Stack trace: {dbEx.StackTrace}");
+                    throw;
+                }
 
-                var clientesDto = _mapper.Map<IEnumerable<ClienteDto>>(clientes);
+                IEnumerable<ClienteDto> clientesDto;
+                try
+                {
+                    clientesDto = _mapper.Map<IEnumerable<ClienteDto>>(clientes);
+                    _logger.LogInformation("Mapeo de DTOs completado");
+                }
+                catch (Exception mapEx)
+                {
+                    _logger.LogError($"Error al mapear a DTOs: {mapEx.Message}");
+                    throw;
+                }
 
-                // Calcular automáticamente TotalGastado, TotalPedidos y FechaUltimoPedido
+                // ✅ Calcular métricas directamente (no modificar entidades en operación de lectura)
                 foreach (var cliente in clientes)
                 {
                     var clienteDto = clientesDto.FirstOrDefault(c => c.IdCliente == cliente.IdCliente);
                     if (clienteDto != null)
                     {
-                        // Calcular desde los pedidos reales en la BD
-                        clienteDto.TotalGastado = cliente.Pedidos?.Sum(p => p.TotalPedido) ?? 0;
-                        clienteDto.TotalPedidos = cliente.Pedidos?.Count ?? 0;
-                        clienteDto.FechaUltimoPedido = cliente.Pedidos?.Any() == true
-                            ? cliente.Pedidos.Max(p => p.FechaPedido)
-                            : null;
+                        try
+                        {
+                            // Calcular desde los pedidos cargados
+                            if (cliente.Pedidos != null && cliente.Pedidos.Any())
+                            {
+                                clienteDto.TotalGastado = cliente.Pedidos.Sum(p => p.TotalPedido);
+                                clienteDto.TotalPedidos = cliente.Pedidos.Count;
+                                clienteDto.FechaUltimoPedido = cliente.Pedidos.Max(p => p.FechaPedido);
+                            }
+                            else
+                            {
+                                clienteDto.TotalGastado = 0;
+                                clienteDto.TotalPedidos = 0;
+                                clienteDto.FechaUltimoPedido = null;
+                            }
+                            
+                            // Determinar categoría usando el service (sin modificar la entidad)
+                            clienteDto.CategoriaCliente = await _clienteService.DeterminarCategoriaClienteAsync(clienteDto.TotalGastado);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"Error al calcular métricas para cliente {cliente.IdCliente}: {ex.Message}");
+                            // Valores por defecto si hay error
+                            clienteDto.TotalGastado = 0;
+                            clienteDto.TotalPedidos = 0;
+                            clienteDto.FechaUltimoPedido = null;
+                        }
                     }
                 }
 
                 return Ok(clientesDto);
             }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
+            {
+                _logger.LogError($"Error de base de datos al obtener los Clientes: {dbEx.Message}");
+                _logger.LogError($"Inner exception: {dbEx.InnerException?.Message}");
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    $"Error de conexión a la base de datos: {dbEx.InnerException?.Message ?? dbEx.Message}");
+            }
+            catch (System.Net.Sockets.SocketException socketEx)
+            {
+                _logger.LogError($"Error de red al conectar con la base de datos: {socketEx.Message}");
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    $"Error de conexión de red. Verifique su conexión a internet y que el servidor de base de datos esté accesible.");
+            }
+            catch (Npgsql.NpgsqlException npgsqlEx)
+            {
+                _logger.LogError($"Error de PostgreSQL al obtener los Clientes: {npgsqlEx.Message}");
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    $"Error de conexión a PostgreSQL: {npgsqlEx.Message}");
+            }
             catch (Exception ex)
             {
                 _logger.LogError($"Error al obtener los Clientes: {ex.Message}");
+                _logger.LogError($"Tipo de excepción: {ex.GetType().FullName}");
+                _logger.LogError($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    _logger.LogError($"Inner exception: {ex.InnerException.Message}");
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        $"Error interno del servidor: {ex.InnerException.Message}");
+                }
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Error interno del servidor al obtener los Clientes.");
+                    $"Error interno del servidor al obtener los Clientes: {ex.Message}");
             }
         }
 
@@ -92,12 +171,33 @@ namespace TritoteNic.Controllers
 
                 var clienteDto = _mapper.Map<ClienteDto>(cliente);
                 
-                // Calcular automáticamente TotalGastado, TotalPedidos y FechaUltimoPedido
-                clienteDto.TotalGastado = cliente.Pedidos?.Sum(p => p.TotalPedido) ?? 0;
-                clienteDto.TotalPedidos = cliente.Pedidos?.Count ?? 0;
-                clienteDto.FechaUltimoPedido = cliente.Pedidos?.Any() == true
-                    ? cliente.Pedidos.Max(p => p.FechaPedido)
-                    : null;
+                // ✅ Calcular métricas directamente (no modificar entidad en operación de lectura)
+                try
+                {
+                    if (cliente.Pedidos != null && cliente.Pedidos.Any())
+                    {
+                        clienteDto.TotalGastado = cliente.Pedidos.Sum(p => p.TotalPedido);
+                        clienteDto.TotalPedidos = cliente.Pedidos.Count;
+                        clienteDto.FechaUltimoPedido = cliente.Pedidos.Max(p => p.FechaPedido);
+                    }
+                    else
+                    {
+                        clienteDto.TotalGastado = 0;
+                        clienteDto.TotalPedidos = 0;
+                        clienteDto.FechaUltimoPedido = null;
+                    }
+                    
+                    // Determinar categoría usando el service (sin modificar la entidad)
+                    clienteDto.CategoriaCliente = await _clienteService.DeterminarCategoriaClienteAsync(clienteDto.TotalGastado);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Error al calcular métricas para cliente {cliente.IdCliente}: {ex.Message}");
+                    // Valores por defecto si hay error
+                    clienteDto.TotalGastado = 0;
+                    clienteDto.TotalPedidos = 0;
+                    clienteDto.FechaUltimoPedido = null;
+                }
 
                 return Ok(clienteDto);
             }
@@ -110,6 +210,7 @@ namespace TritoteNic.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -160,6 +261,7 @@ namespace TritoteNic.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -217,6 +319,7 @@ namespace TritoteNic.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -248,6 +351,7 @@ namespace TritoteNic.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

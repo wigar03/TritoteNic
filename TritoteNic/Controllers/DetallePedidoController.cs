@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace TritoteNic.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminOrVendedor")]
     public class DetallePedidoController : ControllerBase
     {
         private readonly TritoteContext.TritoteConext _context;
@@ -109,6 +111,7 @@ namespace TritoteNic.Controllers
 
         // POST: api/DetallePedido
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -168,6 +171,7 @@ namespace TritoteNic.Controllers
 
         // PUT: api/DetallePedido/{id}
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -220,6 +224,7 @@ namespace TritoteNic.Controllers
 
         // DELETE: api/DetallePedido/{id}
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

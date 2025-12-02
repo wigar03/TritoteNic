@@ -4,19 +4,28 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TritoteNic.Data;
 using TritoteNic;
+using TritoteNic.Middleware;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("La cadena de conexión 'DefaultConnection' no está configurada en appsettings.json");
+}
+
 builder.Services.AddDbContext<TritoteContext.TritoteConext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 
-// JWT Service
+// Services
 builder.Services.AddScoped<TritoteNic.Services.IJwtService, TritoteNic.Services.JwtService>();
+builder.Services.AddScoped<TritoteNic.Services.IPedidoService, TritoteNic.Services.PedidoService>();
+builder.Services.AddScoped<TritoteNic.Services.IClienteService, TritoteNic.Services.ClienteService>();
 
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "CHANGE_ME_IN_PRODUCTION";
@@ -34,11 +43,30 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            // Configurar para leer roles desde el token
+            RoleClaimType = System.Security.Claims.ClaimTypes.Role
         };
     });
 
-builder.Services.AddAuthorization();
+// Configurar políticas de autorización por roles
+builder.Services.AddAuthorization(options =>
+{
+    // Política para Administradores: acceso completo
+    options.AddPolicy("AdminOnly", policy => 
+        policy.RequireRole("Administrador", "Admin"));
+    
+    // Política para Vendedores: acceso limitado
+    options.AddPolicy("VendedorOnly", policy => 
+        policy.RequireRole("Vendedor"));
+    
+    // Política para Admin o Vendedor (acceso común)
+    options.AddPolicy("AdminOrVendedor", policy => 
+        policy.RequireRole("Administrador", "Admin", "Vendedor"));
+    
+    // Política por defecto: requiere autenticación
+    options.FallbackPolicy = options.DefaultPolicy;
+});
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 
@@ -93,6 +121,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("AllowWPF");
+
+// Middleware de manejo de errores (debe ir antes de UseAuthentication)
+app.UseExceptionHandling();
 
 app.UseAuthentication();
 app.UseAuthorization();
