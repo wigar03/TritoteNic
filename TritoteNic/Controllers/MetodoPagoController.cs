@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
 using SharedModels.Dto;
 using TritoteNic.Data;
+using TritoteNic.Services;
 
 namespace TritoteNic.Controllers
 {
@@ -17,12 +18,14 @@ namespace TritoteNic.Controllers
         private readonly TritoteContext.TritoteConext _context;
         private readonly ILogger<MetodoPagoController> _logger;
         private readonly IMapper _mapper;
+        private readonly IBitacoraService _bitacoraService;
 
-        public MetodoPagoController(TritoteContext.TritoteConext context, ILogger<MetodoPagoController> logger, IMapper mapper)
+        public MetodoPagoController(TritoteContext.TritoteConext context, ILogger<MetodoPagoController> logger, IMapper mapper, IBitacoraService bitacoraService)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _bitacoraService = bitacoraService;
         }
 
         [HttpGet]
@@ -117,6 +120,16 @@ namespace TritoteNic.Controllers
                 _context.MetodosPago.Add(metodo);
                 await _context.SaveChangesAsync();
 
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "MetodoPago",
+                    accion: "CREATE",
+                    idRegistro: metodo.IdMetodoPago,
+                    descripcionRegistro: metodo.NombreMetodoPago,
+                    datosAnteriores: null,
+                    datosNuevos: createDto,
+                    observaciones: $"Método de pago creado: {metodo.NombreMetodoPago}");
+
                 _logger.LogInformation($"Nuevo método de pago '{createDto.NombreMetodoPago}' creado con ID: {metodo.IdMetodoPago}");
                 return CreatedAtAction(nameof(GetMetodoPago), new { id = metodo.IdMetodoPago }, _mapper.Map<MetodoPagoDto>(metodo));
             }
@@ -152,9 +165,22 @@ namespace TritoteNic.Controllers
                     return NotFound("El método de pago no existe.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new { metodoExistente.NombreMetodoPago };
+
                 //Actualizar solo las propiedades necesarias del método existente
                 _mapper.Map(updateDto, metodoExistente);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "MetodoPago",
+                    accion: "UPDATE",
+                    idRegistro: id,
+                    descripcionRegistro: metodoExistente.NombreMetodoPago,
+                    datosAnteriores: datosAnteriores,
+                    datosNuevos: updateDto,
+                    observaciones: $"Método de pago actualizado: {metodoExistente.NombreMetodoPago}");
 
                 _logger.LogInformation($"Método de pago con ID {id} actualizado correctamente.");
                 return NoContent();
@@ -193,8 +219,21 @@ namespace TritoteNic.Controllers
                     return NotFound("Método de Pago no encontrado.");
                 }
 
+                // Guardar datos antes de eliminar para bitácora
+                var datosEliminados = new { metodo.NombreMetodoPago };
+
                 _context.MetodosPago.Remove(metodo);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "MetodoPago",
+                    accion: "DELETE",
+                    idRegistro: id,
+                    descripcionRegistro: metodo.NombreMetodoPago,
+                    datosAnteriores: datosEliminados,
+                    datosNuevos: null,
+                    observaciones: $"Método de pago eliminado: {metodo.NombreMetodoPago}");
 
                 _logger.LogInformation($"Método de pago con ID {id} eliminado correctamente");
                 return NoContent();

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
 using SharedModels.Dto;
 using TritoteNic.Data;
+using TritoteNic.Services;
 
 namespace TritoteNic.Controllers
 {
@@ -18,12 +19,14 @@ namespace TritoteNic.Controllers
         private readonly TritoteContext.TritoteConext _context;
         private readonly ILogger<ProductoController> _logger;
         private readonly IMapper _mapper;
+        private readonly Services.IBitacoraService _bitacoraService;
 
-        public ProductoController(TritoteContext.TritoteConext context, ILogger<ProductoController> logger, IMapper mapper)
+        public ProductoController(TritoteContext.TritoteConext context, ILogger<ProductoController> logger, IMapper mapper, Services.IBitacoraService bitacoraService)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _bitacoraService = bitacoraService;
         }
 
         [HttpGet]
@@ -118,6 +121,16 @@ namespace TritoteNic.Controllers
                 _context.Productos.Add(producto);
                 await _context.SaveChangesAsync();
 
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Producto",
+                    accion: "CREATE",
+                    idRegistro: producto.IdProducto,
+                    descripcionRegistro: producto.NombreProducto,
+                    datosAnteriores: null,
+                    datosNuevos: createDto,
+                    observaciones: $"Producto creado: {producto.NombreProducto} - Stock: {producto.StockProducto}");
+
                 _logger.LogInformation($"Nuevo producto '{createDto.NombreProducto}' creado con ID: {producto.IdProducto}");
                 return CreatedAtAction(nameof(GetProducto), new { id = producto.IdProducto }, _mapper.Map<ProductoDto>(producto));
             }
@@ -153,9 +166,28 @@ namespace TritoteNic.Controllers
                     return NotFound("El producto no existe.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new
+                {
+                    productoExistente.NombreProducto,
+                    productoExistente.PrecioProducto,
+                    productoExistente.StockProducto,
+                    productoExistente.EstadoProducto
+                };
+
                 //Actualizar solo las propiedades necesarias del producto existente
                 _mapper.Map(updateDto, productoExistente);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Producto",
+                    accion: "UPDATE",
+                    idRegistro: id,
+                    descripcionRegistro: productoExistente.NombreProducto,
+                    datosAnteriores: datosAnteriores,
+                    datosNuevos: updateDto,
+                    observaciones: $"Producto actualizado: {productoExistente.NombreProducto}");
 
                 _logger.LogInformation($"Producto con ID {id} actualizado correctamente.");
                 return NoContent();
@@ -194,8 +226,26 @@ namespace TritoteNic.Controllers
                     return NotFound("Producto no encontrado.");
                 }
 
+                // Guardar datos antes de eliminar para bitácora
+                var datosEliminados = new
+                {
+                    producto.NombreProducto,
+                    producto.PrecioProducto,
+                    producto.StockProducto
+                };
+
                 _context.Productos.Remove(producto);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Producto",
+                    accion: "DELETE",
+                    idRegistro: id,
+                    descripcionRegistro: producto.NombreProducto,
+                    datosAnteriores: datosEliminados,
+                    datosNuevos: null,
+                    observaciones: $"Producto eliminado: {producto.NombreProducto}");
 
                 _logger.LogInformation($"Producto con ID {id} eliminado correctamente");
                 return NoContent();
@@ -233,6 +283,15 @@ namespace TritoteNic.Controllers
                     return NotFound("El producto no se encontró.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new
+                {
+                    producto.NombreProducto,
+                    producto.PrecioProducto,
+                    producto.StockProducto,
+                    producto.EstadoProducto
+                };
+
                 var productoDto = _mapper.Map<ProductoUpdateDto>(producto);
                 patchDto.ApplyTo(productoDto, ModelState);
 
@@ -250,6 +309,17 @@ namespace TritoteNic.Controllers
                     {
                         await _context.SaveChangesAsync();
                         transaction.Commit();
+                        
+                        // Registrar en bitácora
+                        await _bitacoraService.RegistrarCambioAsync(
+                            tablaAfectada: "Producto",
+                            accion: "PATCH",
+                            idRegistro: id,
+                            descripcionRegistro: producto.NombreProducto,
+                            datosAnteriores: datosAnteriores,
+                            datosNuevos: productoDto,
+                            observaciones: $"Producto actualizado parcialmente: {producto.NombreProducto}");
+                        
                         _logger.LogInformation($"Parche aplicado correctamente al producto con ID: {id}");
                         return NoContent();
                     }

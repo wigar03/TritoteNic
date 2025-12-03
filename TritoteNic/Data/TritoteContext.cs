@@ -20,6 +20,7 @@ namespace TritoteNic.Data
             public DbSet<MetodoPago> MetodosPago { get; set; }
             public DbSet<EstadoPedido> EstadosPedidos { get; set; }
             public DbSet<Categoria> Categorias { get; set; }
+            public DbSet<Bitacora> Bitacoras { get; set; }
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {

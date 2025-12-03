@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
 using SharedModels.Dto;
 using TritoteNic.Data;
+using TritoteNic.Services;
 
 namespace TritoteNic.Controllers
 {
@@ -17,12 +18,14 @@ namespace TritoteNic.Controllers
         private readonly TritoteContext.TritoteConext _context;
         private readonly ILogger<EstadoPedidoController> _logger;
         private readonly IMapper _mapper;
+        private readonly IBitacoraService _bitacoraService;
 
-        public EstadoPedidoController(TritoteContext.TritoteConext context, ILogger<EstadoPedidoController> logger, IMapper mapper)
+        public EstadoPedidoController(TritoteContext.TritoteConext context, ILogger<EstadoPedidoController> logger, IMapper mapper, IBitacoraService bitacoraService)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _bitacoraService = bitacoraService;
         }
 
         [HttpGet]
@@ -117,6 +120,16 @@ namespace TritoteNic.Controllers
                 _context.EstadosPedidos.Add(estado);
                 await _context.SaveChangesAsync();
 
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "EstadoPedido",
+                    accion: "CREATE",
+                    idRegistro: estado.IdEstadoPedido,
+                    descripcionRegistro: estado.NombreEstadoPedido,
+                    datosAnteriores: null,
+                    datosNuevos: createDto,
+                    observaciones: $"Estado de pedido creado: {estado.NombreEstadoPedido}");
+
                 _logger.LogInformation($"Nuevo estado de pedido '{createDto.NombreEstadoPedido}' creado con ID: {estado.IdEstadoPedido}");
                 return CreatedAtAction(nameof(GetEstadoPedido), new { id = estado.IdEstadoPedido }, _mapper.Map<EstadoPedidoDto>(estado));
             }
@@ -152,9 +165,22 @@ namespace TritoteNic.Controllers
                     return NotFound("El estado de pedido no existe.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new { estadoExistente.NombreEstadoPedido };
+
                 //Actualizar solo las propiedades necesarias
                 _mapper.Map(updateDto, estadoExistente);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "EstadoPedido",
+                    accion: "UPDATE",
+                    idRegistro: id,
+                    descripcionRegistro: estadoExistente.NombreEstadoPedido,
+                    datosAnteriores: datosAnteriores,
+                    datosNuevos: updateDto,
+                    observaciones: $"Estado de pedido actualizado: {estadoExistente.NombreEstadoPedido}");
 
                 _logger.LogInformation($"Estado de pedido con ID {id} actualizado correctamente.");
                 return NoContent();
@@ -193,8 +219,21 @@ namespace TritoteNic.Controllers
                     return NotFound("Estado de Pedido no encontrado.");
                 }
 
+                // Guardar datos antes de eliminar para bitácora
+                var datosEliminados = new { estado.NombreEstadoPedido };
+
                 _context.EstadosPedidos.Remove(estado);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "EstadoPedido",
+                    accion: "DELETE",
+                    idRegistro: id,
+                    descripcionRegistro: estado.NombreEstadoPedido,
+                    datosAnteriores: datosEliminados,
+                    datosNuevos: null,
+                    observaciones: $"Estado de pedido eliminado: {estado.NombreEstadoPedido}");
 
                 _logger.LogInformation($"Estado de pedido con ID {id} eliminado correctamente");
                 return NoContent();

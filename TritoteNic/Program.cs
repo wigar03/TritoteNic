@@ -23,9 +23,11 @@ builder.Services.AddDbContext<TritoteContext.TritoteConext>(options =>
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 // Services
+builder.Services.AddHttpContextAccessor(); // Necesario para BitacoraService
 builder.Services.AddScoped<TritoteNic.Services.IJwtService, TritoteNic.Services.JwtService>();
 builder.Services.AddScoped<TritoteNic.Services.IPedidoService, TritoteNic.Services.PedidoService>();
 builder.Services.AddScoped<TritoteNic.Services.IClienteService, TritoteNic.Services.ClienteService>();
+builder.Services.AddScoped<TritoteNic.Services.IBitacoraService, TritoteNic.Services.BitacoraService>();
 
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "CHANGE_ME_IN_PRODUCTION";

@@ -21,17 +21,20 @@ namespace TritoteNic.Controllers
         private readonly ILogger<PedidoController> _logger;
         private readonly IMapper _mapper;
         private readonly IPedidoService _pedidoService;
+        private readonly Services.IBitacoraService _bitacoraService;
 
         public PedidoController(
             TritoteContext.TritoteConext context, 
             ILogger<PedidoController> logger, 
             IMapper mapper,
-            IPedidoService pedidoService)
+            IPedidoService pedidoService,
+            Services.IBitacoraService bitacoraService)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
             _pedidoService = pedidoService;
+            _bitacoraService = bitacoraService;
         }
 
         [HttpGet]
@@ -218,6 +221,16 @@ namespace TritoteNic.Controllers
                     }).ToList();
                 }
 
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Pedido",
+                    accion: "CREATE",
+                    idRegistro: pedido.IdPedido,
+                    descripcionRegistro: $"Pedido #{pedido.IdPedido} - Cliente: {pedido.Cliente?.NombreCliente}",
+                    datosAnteriores: null,
+                    datosNuevos: createDto,
+                    observaciones: $"Pedido creado - Total: {pedido.TotalPedido:C}");
+
                 _logger.LogInformation($"Nuevo pedido creado con ID: {pedido.IdPedido}");
                 return CreatedAtAction(nameof(GetPedido), new { id = pedido.IdPedido }, pedidoDto);
             }
@@ -263,10 +276,29 @@ namespace TritoteNic.Controllers
                     return NotFound("El pedido no existe.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new
+                {
+                    pedidoExistente.IdEstadoPedido,
+                    pedidoExistente.TotalPedido,
+                    pedidoExistente.SubtotalPedido,
+                    pedidoExistente.Descuento
+                };
+
                 //Actualizar solo las propiedades necesarias del pedido existente
                 _mapper.Map(updateDto, pedidoExistente);
 
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Pedido",
+                    accion: "UPDATE",
+                    idRegistro: id,
+                    descripcionRegistro: $"Pedido #{id}",
+                    datosAnteriores: datosAnteriores,
+                    datosNuevos: updateDto,
+                    observaciones: $"Pedido actualizado");
 
                 _logger.LogInformation($"Pedido con ID {id} actualizado correctamente.");
                 return NoContent();
@@ -305,8 +337,26 @@ namespace TritoteNic.Controllers
                     return NotFound("Pedido no encontrado.");
                 }
 
+                // Guardar datos antes de eliminar para bitácora
+                var datosEliminados = new
+                {
+                    pedido.IdCliente,
+                    pedido.TotalPedido,
+                    pedido.FechaPedido
+                };
+
                 _context.Pedidos.Remove(pedido);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Pedido",
+                    accion: "DELETE",
+                    idRegistro: id,
+                    descripcionRegistro: $"Pedido #{id}",
+                    datosAnteriores: datosEliminados,
+                    datosNuevos: null,
+                    observaciones: $"Pedido eliminado - Total: {pedido.TotalPedido:C}");
 
                 _logger.LogInformation($"Pedido con ID {id} eliminado correctamente");
                 return NoContent();
@@ -344,6 +394,15 @@ namespace TritoteNic.Controllers
                     return NotFound("El pedido no se encontró.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new
+                {
+                    pedido.IdEstadoPedido,
+                    pedido.TotalPedido,
+                    pedido.SubtotalPedido,
+                    pedido.Descuento
+                };
+
                 var pedidoDto = _mapper.Map<PedidoUpdateDto>(pedido);
                 patchDto.ApplyTo(pedidoDto, ModelState);
 
@@ -361,6 +420,17 @@ namespace TritoteNic.Controllers
                     {
                         await _context.SaveChangesAsync();
                         transaction.Commit();
+                        
+                        // Registrar en bitácora
+                        await _bitacoraService.RegistrarCambioAsync(
+                            tablaAfectada: "Pedido",
+                            accion: "PATCH",
+                            idRegistro: id,
+                            descripcionRegistro: $"Pedido #{id}",
+                            datosAnteriores: datosAnteriores,
+                            datosNuevos: pedidoDto,
+                            observaciones: $"Pedido actualizado parcialmente");
+                        
                         _logger.LogInformation($"Parche aplicado correctamente al pedido con ID: {id}");
                         return NoContent();
                     }

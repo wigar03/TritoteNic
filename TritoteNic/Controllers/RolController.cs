@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
 using SharedModels.Dto;
 using TritoteNic.Data;
+using TritoteNic.Services;
 
 namespace TritoteNic.Controllers
 {
@@ -17,12 +18,14 @@ namespace TritoteNic.Controllers
         private readonly TritoteContext.TritoteConext _context;
         private readonly ILogger<RolController> _logger;
         private readonly IMapper _mapper;
+        private readonly IBitacoraService _bitacoraService;
 
-        public RolController(TritoteContext.TritoteConext context, ILogger<RolController> logger, IMapper mapper)
+        public RolController(TritoteContext.TritoteConext context, ILogger<RolController> logger, IMapper mapper, IBitacoraService bitacoraService)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _bitacoraService = bitacoraService;
         }
 
         [HttpGet]
@@ -118,6 +121,16 @@ namespace TritoteNic.Controllers
                 _context.Roles.Add(rol);
                 await _context.SaveChangesAsync();
 
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Rol",
+                    accion: "CREATE",
+                    idRegistro: rol.IdRol,
+                    descripcionRegistro: rol.NombreRol,
+                    datosAnteriores: null,
+                    datosNuevos: createDto,
+                    observaciones: $"Rol creado: {rol.NombreRol}");
+
                 _logger.LogInformation($"Nuevo rol '{createDto.NombreRol}' creado con ID: {rol.IdRol}");
                 return CreatedAtAction(nameof(GetRol), new { id = rol.IdRol }, _mapper.Map<RolDto>(rol));
             }
@@ -152,10 +165,23 @@ namespace TritoteNic.Controllers
                     return NotFound("El rol no existe.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new { rolExistente.NombreRol, rolExistente.DescripcionRol };
+
                 //Actualizar solo las propiedades necesarias del rol existente
                 _mapper.Map(updateDto, rolExistente);
 
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Rol",
+                    accion: "UPDATE",
+                    idRegistro: id,
+                    descripcionRegistro: rolExistente.NombreRol,
+                    datosAnteriores: datosAnteriores,
+                    datosNuevos: updateDto,
+                    observaciones: $"Rol actualizado: {rolExistente.NombreRol}");
 
                 _logger.LogInformation($"Rol con ID {id} actualizado correctamente.");
 
@@ -194,8 +220,21 @@ namespace TritoteNic.Controllers
                     return NotFound("Rol no encontrado.");
                 }
 
+                // Guardar datos antes de eliminar para bitácora
+                var datosEliminados = new { rol.NombreRol, rol.DescripcionRol };
+
                 _context.Roles.Remove(rol);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Rol",
+                    accion: "DELETE",
+                    idRegistro: id,
+                    descripcionRegistro: rol.NombreRol,
+                    datosAnteriores: datosEliminados,
+                    datosNuevos: null,
+                    observaciones: $"Rol eliminado: {rol.NombreRol}");
 
                 _logger.LogInformation($"Rol con ID {id} eliminado correctamente");
 

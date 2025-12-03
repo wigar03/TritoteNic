@@ -22,6 +22,71 @@ namespace TritoteNic.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("SharedModels.Clases.Bitacora", b =>
+                {
+                    b.Property<int>("IdBitacora")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id_bitacora");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdBitacora"));
+
+                    b.Property<string>("Accion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("accion");
+
+                    b.Property<string>("DatosAnteriores")
+                        .HasColumnType("text")
+                        .HasColumnName("datos_anteriores");
+
+                    b.Property<string>("DatosNuevos")
+                        .HasColumnType("text")
+                        .HasColumnName("datos_nuevos");
+
+                    b.Property<string>("DescripcionRegistro")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("descripcion_registro");
+
+                    b.Property<DateTime>("FechaAccion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_accion");
+
+                    b.Property<int?>("IdRegistro")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_registro");
+
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_usuario");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("ip_address");
+
+                    b.Property<string>("NombreUsuario")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nombre_usuario");
+
+                    b.Property<string>("Observaciones")
+                        .HasColumnType("text")
+                        .HasColumnName("observaciones");
+
+                    b.Property<string>("TablaAfectada")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("tabla_afectada");
+
+                    b.HasKey("IdBitacora");
+
+                    b.ToTable("Bitacora");
+                });
+
             modelBuilder.Entity("SharedModels.Clases.Categoria", b =>
                 {
                     b.Property<int>("IdCategoria")
@@ -241,7 +306,6 @@ namespace TritoteNic.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdProducto"));
 
                     b.Property<string>("DescripcionProducto")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
@@ -255,7 +319,6 @@ namespace TritoteNic.Migrations
                         .HasColumnName("id_categoria");
 
                     b.Property<string>("ImagenProducto")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 

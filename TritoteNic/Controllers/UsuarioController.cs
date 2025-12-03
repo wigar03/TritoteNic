@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using TritoteNic.Data;
+using TritoteNic.Services;
 using SharedModels.Dto;
 using SharedModels.Clases;
 
@@ -18,12 +19,14 @@ namespace TritoteNic.Controllers
         private readonly TritoteContext.TritoteConext _context;
         private readonly ILogger<UsuarioController> _logger;
         private readonly IMapper _mapper;
+        private readonly Services.IBitacoraService _bitacoraService;
 
-        public UsuarioController(TritoteContext.TritoteConext context, ILogger<UsuarioController> logger, IMapper mapper)
+        public UsuarioController(TritoteContext.TritoteConext context, ILogger<UsuarioController> logger, IMapper mapper, Services.IBitacoraService bitacoraService)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _bitacoraService = bitacoraService;
         }
 
         [HttpGet]
@@ -121,6 +124,16 @@ namespace TritoteNic.Controllers
                 _context.Usuarios.Add(nuevoUsuario);
                 await _context.SaveChangesAsync();
 
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Usuario",
+                    accion: "CREATE",
+                    idRegistro: nuevoUsuario.IdUsuario,
+                    descripcionRegistro: nuevoUsuario.NombreUsuario,
+                    datosAnteriores: null,
+                    datosNuevos: new { createDto.NombreUsuario, createDto.EmailUsuario, IdRol = createDto.IdRol },
+                    observaciones: $"Usuario creado: {nuevoUsuario.NombreUsuario}");
+
                 _logger.LogInformation($"Nuevo usuario '{createDto.NombreUsuario}' creado con ID: {nuevoUsuario.IdUsuario}");
                 return CreatedAtAction(nameof(GetUsuario), new { id = nuevoUsuario.IdUsuario }, _mapper.Map<UsuarioDto>(nuevoUsuario));
             }
@@ -155,9 +168,28 @@ namespace TritoteNic.Controllers
                     return NotFound("El usuario no existe.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new
+                {
+                    usuarioExistente.NombreUsuario,
+                    usuarioExistente.EmailUsuario,
+                    usuarioExistente.EstadoUsuario,
+                    usuarioExistente.IdRol
+                };
+
                 //Actualizar solo las propiedades necesarias del usuario existente
                 _mapper.Map(updateDto, usuarioExistente);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Usuario",
+                    accion: "UPDATE",
+                    idRegistro: id,
+                    descripcionRegistro: usuarioExistente.NombreUsuario,
+                    datosAnteriores: datosAnteriores,
+                    datosNuevos: updateDto,
+                    observaciones: $"Usuario actualizado: {usuarioExistente.NombreUsuario}");
 
                 _logger.LogInformation($"Usuario con ID {id} actualizado correctamente.");
 
@@ -203,6 +235,15 @@ namespace TritoteNic.Controllers
                     return NotFound("El usuario no se encontró.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new
+                {
+                    usuario.NombreUsuario,
+                    usuario.EmailUsuario,
+                    usuario.EstadoUsuario,
+                    usuario.IdRol
+                };
+
                 var usuarioDto = _mapper.Map<UsuarioUpdateDto>(usuario);
                 patchDto.ApplyTo(usuarioDto, ModelState);
 
@@ -232,6 +273,17 @@ namespace TritoteNic.Controllers
                     {
                         await _context.SaveChangesAsync();
                         transaction.Commit();
+                        
+                        // Registrar en bitácora
+                        await _bitacoraService.RegistrarCambioAsync(
+                            tablaAfectada: "Usuario",
+                            accion: "PATCH",
+                            idRegistro: id,
+                            descripcionRegistro: usuario.NombreUsuario,
+                            datosAnteriores: datosAnteriores,
+                            datosNuevos: usuarioDto,
+                            observaciones: $"Usuario actualizado parcialmente: {usuario.NombreUsuario}");
+                        
                         _logger.LogInformation($"Parche aplicado correctamente al usuario con ID: {id}");
                         return NoContent();
                     }
@@ -296,8 +348,26 @@ namespace TritoteNic.Controllers
                     return NotFound("Usuario no encontrado.");
                 }
 
+                // Guardar datos antes de eliminar para bitácora
+                var datosEliminados = new
+                {
+                    usuario.NombreUsuario,
+                    usuario.EmailUsuario,
+                    usuario.EstadoUsuario
+                };
+
                 _context.Usuarios.Remove(usuario);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Usuario",
+                    accion: "DELETE",
+                    idRegistro: id,
+                    descripcionRegistro: usuario.NombreUsuario,
+                    datosAnteriores: datosEliminados,
+                    datosNuevos: null,
+                    observaciones: $"Usuario eliminado: {usuario.NombreUsuario}");
 
                 _logger.LogInformation($"Usuario con ID {id} elimiando correctamente");
 

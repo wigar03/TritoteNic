@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
 using SharedModels.Dto;
 using TritoteNic.Data;
+using TritoteNic.Services;
 
 namespace TritoteNic.Controllers
 {
@@ -17,12 +18,14 @@ namespace TritoteNic.Controllers
         private readonly TritoteContext.TritoteConext _context;
         private readonly ILogger<DetallePedidoController> _logger;
         private readonly IMapper _mapper;
+        private readonly IBitacoraService _bitacoraService;
 
-        public DetallePedidoController(TritoteContext.TritoteConext context, ILogger<DetallePedidoController> logger, IMapper mapper)
+        public DetallePedidoController(TritoteContext.TritoteConext context, ILogger<DetallePedidoController> logger, IMapper mapper, IBitacoraService bitacoraService)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _bitacoraService = bitacoraService;
         }
 
         // GET: api/DetallePedido
@@ -158,6 +161,16 @@ namespace TritoteNic.Controllers
                 _context.DetallesPedido.Add(detalle);
                 await _context.SaveChangesAsync();
 
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "DetallePedido",
+                    accion: "CREATE",
+                    idRegistro: detalle.IdDetalle,
+                    descripcionRegistro: $"Detalle #{detalle.IdDetalle} - Pedido #{detalle.IdPedido}",
+                    datosAnteriores: null,
+                    datosNuevos: createDto,
+                    observaciones: $"Detalle de pedido creado - Producto ID: {detalle.IdProducto}");
+
                 _logger.LogInformation($"Detalle creado con ID: {detalle.IdDetalle}");
                 return CreatedAtAction(nameof(GetDetallePedido), new { id = detalle.IdDetalle }, _mapper.Map<DetallePedidoDto>(detalle));
             }
@@ -194,6 +207,16 @@ namespace TritoteNic.Controllers
                     return NotFound("El detalle de pedido no existe.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new
+                {
+                    detalleExistente.IdPedido,
+                    detalleExistente.IdProducto,
+                    detalleExistente.CantidadProducto,
+                    detalleExistente.PrecioUnitarioProducto,
+                    detalleExistente.SubtotalProducto
+                };
+
                 // Actualizar propiedades
                 detalleExistente.IdPedido = updateDto.IdPedido;
                 detalleExistente.IdProducto = updateDto.IdProducto;
@@ -202,6 +225,16 @@ namespace TritoteNic.Controllers
                 detalleExistente.SubtotalProducto = updateDto.SubtotalProducto;
 
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "DetallePedido",
+                    accion: "UPDATE",
+                    idRegistro: id,
+                    descripcionRegistro: $"Detalle #{id} - Pedido #{detalleExistente.IdPedido}",
+                    datosAnteriores: datosAnteriores,
+                    datosNuevos: updateDto,
+                    observaciones: $"Detalle de pedido actualizado");
 
                 _logger.LogInformation($"Detalle de pedido con ID {id} actualizado correctamente.");
                 return NoContent();
@@ -241,8 +274,27 @@ namespace TritoteNic.Controllers
                     return NotFound("Detalle de Pedido no encontrado.");
                 }
 
+                // Guardar datos antes de eliminar para bitácora
+                var datosEliminados = new
+                {
+                    detalle.IdPedido,
+                    detalle.IdProducto,
+                    detalle.CantidadProducto,
+                    detalle.SubtotalProducto
+                };
+
                 _context.DetallesPedido.Remove(detalle);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "DetallePedido",
+                    accion: "DELETE",
+                    idRegistro: id,
+                    descripcionRegistro: $"Detalle #{id} - Pedido #{detalle.IdPedido}",
+                    datosAnteriores: datosEliminados,
+                    datosNuevos: null,
+                    observaciones: $"Detalle de pedido eliminado");
 
                 _logger.LogInformation($"Detalle de pedido con ID {id} eliminado correctamente");
                 return NoContent();

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedModels.Clases;
 using SharedModels.Dto;
 using TritoteNic.Data;
+using TritoteNic.Services;
 
 namespace TritoteNic.Controllers
 {
@@ -17,12 +18,14 @@ namespace TritoteNic.Controllers
         private readonly TritoteContext.TritoteConext _context;
         private readonly ILogger<CategoriaController> _logger;
         private readonly IMapper _mapper;
+        private readonly IBitacoraService _bitacoraService;
 
-        public CategoriaController(TritoteContext.TritoteConext context, ILogger<CategoriaController> logger, IMapper mapper)
+        public CategoriaController(TritoteContext.TritoteConext context, ILogger<CategoriaController> logger, IMapper mapper, IBitacoraService bitacoraService)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _bitacoraService = bitacoraService;
         }
 
         [HttpGet]
@@ -115,6 +118,16 @@ namespace TritoteNic.Controllers
                 _context.Set<Categoria>().Add(categoria);
                 await _context.SaveChangesAsync();
 
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Categoria",
+                    accion: "CREATE",
+                    idRegistro: categoria.IdCategoria,
+                    descripcionRegistro: categoria.NombreCategoria,
+                    datosAnteriores: null,
+                    datosNuevos: createDto,
+                    observaciones: $"Categoría creada: {categoria.NombreCategoria}");
+
                 _logger.LogInformation($"Categoría creada con ID: {categoria.IdCategoria}");
                 return CreatedAtAction(nameof(GetCategoria), new { id = categoria.IdCategoria }, _mapper.Map<CategoriaDto>(categoria));
             }
@@ -150,6 +163,13 @@ namespace TritoteNic.Controllers
                     return NotFound("La categoría no existe.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new
+                {
+                    categoriaExistente.NombreCategoria,
+                    categoriaExistente.DescripcionCategoria
+                };
+
                 // Verificar duplicado de nombre si cambia
                 if (!string.IsNullOrWhiteSpace(updateDto.NombreCategoria))
                 {
@@ -164,6 +184,16 @@ namespace TritoteNic.Controllers
 
                 _mapper.Map(updateDto, categoriaExistente);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Categoria",
+                    accion: "UPDATE",
+                    idRegistro: id,
+                    descripcionRegistro: categoriaExistente.NombreCategoria,
+                    datosAnteriores: datosAnteriores,
+                    datosNuevos: updateDto,
+                    observaciones: $"Categoría actualizada: {categoriaExistente.NombreCategoria}");
 
                 _logger.LogInformation($"Categoría ID {id} actualizada correctamente.");
                 return NoContent();
@@ -198,8 +228,25 @@ namespace TritoteNic.Controllers
                     return NotFound("Categoría no encontrada.");
                 }
 
+                // Guardar datos antes de eliminar para bitácora
+                var datosEliminados = new
+                {
+                    categoria.NombreCategoria,
+                    categoria.DescripcionCategoria
+                };
+
                 _context.Set<Categoria>().Remove(categoria);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Categoria",
+                    accion: "DELETE",
+                    idRegistro: id,
+                    descripcionRegistro: categoria.NombreCategoria,
+                    datosAnteriores: datosEliminados,
+                    datosNuevos: null,
+                    observaciones: $"Categoría eliminada: {categoria.NombreCategoria}");
 
                 _logger.LogInformation($"Categoría ID {id} eliminada correctamente.");
                 return NoContent();

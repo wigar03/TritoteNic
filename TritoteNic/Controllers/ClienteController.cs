@@ -21,17 +21,20 @@ namespace TritoteNic.Controllers
         private readonly ILogger<ClienteController> _logger;
         private readonly IMapper _mapper;
         private readonly IClienteService _clienteService;
+        private readonly Services.IBitacoraService _bitacoraService;
 
         public ClienteController(
             TritoteContext.TritoteConext context, 
             ILogger<ClienteController> logger, 
             IMapper mapper,
-            IClienteService clienteService)
+            IClienteService clienteService,
+            Services.IBitacoraService bitacoraService)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
             _clienteService = clienteService;
+            _bitacoraService = bitacoraService;
         }
 
         [HttpGet]
@@ -210,7 +213,7 @@ namespace TritoteNic.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "AdminOrVendedor")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -249,6 +252,16 @@ namespace TritoteNic.Controllers
                 _context.Clientes.Add(cliente);
                 await _context.SaveChangesAsync();
 
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Cliente",
+                    accion: "CREATE",
+                    idRegistro: cliente.IdCliente,
+                    descripcionRegistro: cliente.NombreCliente,
+                    datosAnteriores: null,
+                    datosNuevos: createDto,
+                    observaciones: $"Cliente creado: {cliente.NombreCliente}");
+
                 _logger.LogInformation($"Nuevo cliente '{createDto.NombreCliente}' creado con ID: {cliente.IdCliente}");
                 return CreatedAtAction(nameof(GetCliente), new { id = cliente.IdCliente }, _mapper.Map<ClienteDto>(cliente));
             }
@@ -261,7 +274,7 @@ namespace TritoteNic.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "AdminOrVendedor")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -284,6 +297,15 @@ namespace TritoteNic.Controllers
                     return NotFound("El cliente no existe.");
                 }
 
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new
+                {
+                    clienteExistente.NombreCliente,
+                    clienteExistente.TelefonoCliente,
+                    clienteExistente.EmailCliente,
+                    clienteExistente.DireccionCliente
+                };
+
                 // Verificar conflicto de email si se actualiza
                 if (!string.IsNullOrWhiteSpace(updateDto.EmailCliente))
                 {
@@ -298,6 +320,16 @@ namespace TritoteNic.Controllers
 
                 _mapper.Map(updateDto, clienteExistente);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Cliente",
+                    accion: "UPDATE",
+                    idRegistro: id,
+                    descripcionRegistro: clienteExistente.NombreCliente,
+                    datosAnteriores: datosAnteriores,
+                    datosNuevos: updateDto,
+                    observaciones: $"Cliente actualizado: {clienteExistente.NombreCliente}");
 
                 _logger.LogInformation($"Cliente con ID {id} actualizado correctamente.");
                 return NoContent();
@@ -336,8 +368,27 @@ namespace TritoteNic.Controllers
                     return NotFound("Cliente no encontrado.");
                 }
 
+                // Guardar datos antes de eliminar para bitácora
+                var datosEliminados = new
+                {
+                    cliente.NombreCliente,
+                    cliente.TelefonoCliente,
+                    cliente.EmailCliente,
+                    cliente.DireccionCliente
+                };
+
                 _context.Clientes.Remove(cliente);
                 await _context.SaveChangesAsync();
+
+                // Registrar en bitácora
+                await _bitacoraService.RegistrarCambioAsync(
+                    tablaAfectada: "Cliente",
+                    accion: "DELETE",
+                    idRegistro: id,
+                    descripcionRegistro: cliente.NombreCliente,
+                    datosAnteriores: datosEliminados,
+                    datosNuevos: null,
+                    observaciones: $"Cliente eliminado: {cliente.NombreCliente}");
 
                 _logger.LogInformation($"Cliente con ID {id} eliminado correctamente");
                 return NoContent();
@@ -351,7 +402,7 @@ namespace TritoteNic.Controllers
         }
 
         [HttpPatch("{id}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "AdminOrVendedor")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -374,6 +425,15 @@ namespace TritoteNic.Controllers
                     _logger.LogWarning($"No se encontró ningún cliente con ID: {id}");
                     return NotFound("El cliente no se encontró.");
                 }
+
+                // Guardar datos anteriores para bitácora
+                var datosAnteriores = new
+                {
+                    cliente.NombreCliente,
+                    cliente.TelefonoCliente,
+                    cliente.EmailCliente,
+                    cliente.DireccionCliente
+                };
 
                 var clienteDto = _mapper.Map<ClienteUpdateDto>(cliente);
                 patchDto.ApplyTo(clienteDto, ModelState);
@@ -404,6 +464,17 @@ namespace TritoteNic.Controllers
                     {
                         await _context.SaveChangesAsync();
                         transaction.Commit();
+                        
+                        // Registrar en bitácora
+                        await _bitacoraService.RegistrarCambioAsync(
+                            tablaAfectada: "Cliente",
+                            accion: "PATCH",
+                            idRegistro: id,
+                            descripcionRegistro: cliente.NombreCliente,
+                            datosAnteriores: datosAnteriores,
+                            datosNuevos: clienteDto,
+                            observaciones: $"Cliente actualizado parcialmente: {cliente.NombreCliente}");
+                        
                         _logger.LogInformation($"Parche aplicado correctamente al cliente con ID: {id}");
                         return NoContent();
                     }

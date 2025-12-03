@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TritoteNic")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b1b33ace3dbc283acfcc3010430a7c9d98cb3bc6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+64daf7339814b5de251c7799310c7d3a158a4b87")]
 [assembly: System.Reflection.AssemblyProductAttribute("TritoteNic")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TritoteNic")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
