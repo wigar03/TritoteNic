@@ -20,11 +20,11 @@ namespace TritoteNic.Services
         {
             string? categoria = null;
 
-            if (totalGastado >= 100000)
+            if (totalGastado >= 70)
             {
                 categoria = "VIP";
             }
-            else if (totalGastado >= 50000)
+            else if (totalGastado >= 10)
             {
                 categoria = "Frecuente";
             }

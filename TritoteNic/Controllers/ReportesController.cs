@@ -40,13 +40,13 @@ namespace TritoteNic.Controllers
         {
             try
             {
-                var hoy = DateTime.Now;
+                var hoy = DateTime.UtcNow;
                 var mesAnalisis = mes ?? hoy.Month;
                 var añoAnalisis = año ?? hoy.Year;
 
                 _logger.LogInformation($"Obteniendo análisis completo para {mesAnalisis}/{añoAnalisis}");
 
-                var inicioMes = new DateTime(añoAnalisis, mesAnalisis, 1);
+                var inicioMes = new DateTime(añoAnalisis, mesAnalisis, 1, 0, 0, 0, DateTimeKind.Utc);
                 var finMes = inicioMes.AddMonths(1).AddDays(-1);
                 var inicioMesAnterior = inicioMes.AddMonths(-1);
                 var finMesAnterior = inicioMes.AddDays(-1);
@@ -64,12 +64,12 @@ namespace TritoteNic.Controllers
 
                     var ventasActuales = await _context.Pedidos
                         .Where(p => p.FechaPedido.Date >= fechaActual.Date && p.FechaPedido.Date <= finSemana.Date)
-                        .SumAsync(p => p.TotalPedido);
+                        .SumAsync(p => (decimal?)p.TotalPedido) ?? 0;
 
                     var ventasAnteriores = await _context.Pedidos
                         .Where(p => p.FechaPedido.Date >= inicioSemanaAnterior.Date && 
                                    p.FechaPedido.Date <= finSemanaAnterior.Date)
-                        .SumAsync(p => p.TotalPedido);
+                        .SumAsync(p => (decimal?)p.TotalPedido) ?? 0;
 
                     var porcentajeCambio = CalcularPorcentajeCambio(ventasAnteriores, ventasActuales);
 
@@ -79,8 +79,8 @@ namespace TritoteNic.Controllers
                         VentasActuales = ventasActuales,
                         VentasAnteriores = ventasAnteriores,
                         PorcentajeCambio = porcentajeCambio,
-                        FechaInicio = fechaActual,
-                        FechaFin = finSemana
+                        FechaInicio = DateTime.SpecifyKind(fechaActual, DateTimeKind.Utc),
+                        FechaFin = DateTime.SpecifyKind(finSemana, DateTimeKind.Utc)
                     });
 
                     fechaActual = finSemana.AddDays(1);
@@ -89,12 +89,12 @@ namespace TritoteNic.Controllers
 
                 var totalPeriodoActual = await _context.Pedidos
                     .Where(p => p.FechaPedido.Date >= inicioMes.Date && p.FechaPedido.Date <= finMes.Date)
-                    .SumAsync(p => p.TotalPedido);
+                    .SumAsync(p => (decimal?)p.TotalPedido) ?? 0;
 
                 var totalPeriodoAnterior = await _context.Pedidos
                     .Where(p => p.FechaPedido.Date >= inicioMesAnterior.Date && 
                                p.FechaPedido.Date <= finMesAnterior.Date)
-                    .SumAsync(p => p.TotalPedido);
+                    .SumAsync(p => (decimal?)p.TotalPedido) ?? 0;
 
                 var porcentajeCambioTotal = CalcularPorcentajeCambio(totalPeriodoAnterior, totalPeriodoActual);
 
@@ -107,17 +107,31 @@ namespace TritoteNic.Controllers
                 };
 
                 // Tendencias de color (extraer de nombres de productos)
-                var productosVendidos = await _context.DetallesPedido
-                    .Where(d => d.Pedido.FechaPedido.Date >= inicioMes.Date && 
-                               d.Pedido.FechaPedido.Date <= finMes.Date)
-                    .Include(d => d.Producto)
-                    .Select(d => new
-                    {
-                        NombreProducto = d.Producto.NombreProducto,
-                        Cantidad = d.CantidadProducto,
-                        Subtotal = d.SubtotalProducto
-                    })
-                    .ToListAsync();
+                var productosVendidos = new List<(string NombreProducto, int Cantidad, decimal Subtotal)>();
+                try
+                {
+                    var detallesConProductos = await _context.DetallesPedido
+                        .Include(d => d.Pedido)
+                        .Include(d => d.Producto)
+                        .Where(d => d.Pedido != null && 
+                                   d.Pedido.FechaPedido.Date >= inicioMes.Date && 
+                                   d.Pedido.FechaPedido.Date <= finMes.Date &&
+                                   d.Producto != null)
+                        .ToListAsync();
+
+                    productosVendidos = detallesConProductos
+                        .Select(d => (
+                            NombreProducto: d.Producto?.NombreProducto ?? "Sin nombre",
+                            Cantidad: d.CantidadProducto,
+                            Subtotal: d.SubtotalProducto
+                        ))
+                        .ToList();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Error al obtener productos vendidos para tendencias de color (continuando sin ellos): {ex.Message}");
+                    productosVendidos = new List<(string NombreProducto, int Cantidad, decimal Subtotal)>();
+                }
 
                 var tendenciasColor = productosVendidos
                     .SelectMany(p => ExtraerColores(p.NombreProducto)
@@ -130,7 +144,7 @@ namespace TritoteNic.Controllers
                     .GroupBy(t => t.Color.ToLower())
                     .Select(g => new TendenciaColorDto
                     {
-                        Color = Capitalizar(g.Key),
+                        Color = Capitalizar(g.Key) ?? "",
                         CantidadVendida = g.Sum(t => t.Cantidad),
                         TotalVentas = g.Sum(t => t.Subtotal),
                         CantidadProductos = g.Count()
@@ -147,19 +161,31 @@ namespace TritoteNic.Controllers
                 }
 
                 // Tendencias por temporada (meses)
-                var tendenciasTemporada = await _context.Pedidos
-                    .Where(p => p.FechaPedido.Year == añoAnalisis)
-                    .GroupBy(p => p.FechaPedido.Month)
-                    .Select(g => new TendenciaTemporadaDto
-                    {
-                        Mes = g.Key,
-                        NombreMes = new DateTime(añoAnalisis, g.Key, 1).ToString("MMMM"),
-                        TotalVentas = g.Sum(p => p.TotalPedido),
-                        CantidadPedidos = g.Count(),
-                        PromedioVenta = g.Average(p => p.TotalPedido)
-                    })
-                    .OrderBy(t => t.Mes)
-                    .ToListAsync();
+                var tendenciasTemporada = new List<TendenciaTemporadaDto>();
+                try
+                {
+                    var pedidosDelAño = await _context.Pedidos
+                        .Where(p => p.FechaPedido.Year == añoAnalisis)
+                        .ToListAsync();
+
+                    tendenciasTemporada = pedidosDelAño
+                        .GroupBy(p => p.FechaPedido.Month)
+                        .Select(g => new TendenciaTemporadaDto
+                        {
+                            Mes = g.Key,
+                            NombreMes = new DateTime(añoAnalisis, g.Key, 1, 0, 0, 0, DateTimeKind.Utc).ToString("MMMM"),
+                            TotalVentas = g.Sum(p => p.TotalPedido),
+                            CantidadPedidos = g.Count(),
+                            PromedioVenta = g.Any() ? g.Average(p => p.TotalPedido) : 0
+                        })
+                        .OrderBy(t => t.Mes)
+                        .ToList();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Error al obtener tendencias temporales (continuando sin ellas): {ex.Message}");
+                    tendenciasTemporada = new List<TendenciaTemporadaDto>();
+                }
 
                 // Rotación de productos (mayor y menor)
                 var productosConStock = await _context.Productos
@@ -172,16 +198,20 @@ namespace TritoteNic.Controllers
                 foreach (var producto in productosConStock)
                 {
                     var ventasProducto = await _context.DetallesPedido
+                        .Include(d => d.Pedido)
                         .Where(d => d.IdProducto == producto.IdProducto &&
+                                   d.Pedido != null &&
                                    d.Pedido.FechaPedido.Date >= inicioMes.Date &&
                                    d.Pedido.FechaPedido.Date <= finMes.Date)
-                        .SumAsync(d => d.CantidadProducto);
+                        .SumAsync(d => (int?)d.CantidadProducto) ?? 0;
 
                     var totalVentasProducto = await _context.DetallesPedido
+                        .Include(d => d.Pedido)
                         .Where(d => d.IdProducto == producto.IdProducto &&
+                                   d.Pedido != null &&
                                    d.Pedido.FechaPedido.Date >= inicioMes.Date &&
                                    d.Pedido.FechaPedido.Date <= finMes.Date)
-                        .SumAsync(d => d.SubtotalProducto);
+                        .SumAsync(d => (decimal?)d.SubtotalProducto) ?? 0;
 
                     // Rotación = cantidad vendida / stock actual (ajustar según necesidad)
                     var rotacion = producto.StockProducto > 0
@@ -191,7 +221,7 @@ namespace TritoteNic.Controllers
                     productosRotacion.Add(new RotacionProductoDto
                     {
                         IdProducto = producto.IdProducto,
-                        NombreProducto = producto.NombreProducto,
+                        NombreProducto = producto.NombreProducto ?? "Sin nombre",
                         Categoria = producto.Categoria?.NombreCategoria ?? "Sin categoría",
                         CantidadVendida = (int)ventasProducto,
                         TotalVentas = totalVentasProducto,
@@ -218,18 +248,24 @@ namespace TritoteNic.Controllers
 
                 var analisis = new AnalisisCompletoDto
                 {
-                    ComparativaVentas = comparativaVentas,
-                    TendenciasColor = tendenciasColor,
-                    TendenciasTemporada = tendenciasTemporada,
-                    ProductosRotacion = todosProductosRotacion
+                    ComparativaVentas = comparativaVentas ?? new ComparativaVentasDto(),
+                    TendenciasColor = tendenciasColor ?? new List<TendenciaColorDto>(),
+                    TendenciasTemporada = tendenciasTemporada ?? new List<TendenciaTemporadaDto>(),
+                    ProductosRotacion = todosProductosRotacion ?? new List<RotacionProductoDto>()
                 };
 
+                _logger.LogInformation("Análisis completo creado exitosamente");
                 return Ok(analisis);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error al obtener análisis completo: {ex.Message}");
-                return StatusCode(500, "Error interno del servidor al obtener el análisis completo.");
+                _logger.LogError(ex, $"Error al obtener análisis completo: {ex.Message}");
+                _logger.LogError($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    _logger.LogError($"Inner exception: {ex.InnerException.Message}");
+                }
+                return StatusCode(500, new { message = "Error interno del servidor al obtener el análisis completo.", error = ex.Message });
             }
         }
 
@@ -246,17 +282,21 @@ namespace TritoteNic.Controllers
 
                 _logger.LogInformation($"Obteniendo tendencias de color desde {desde:yyyy-MM-dd} hasta {hasta:yyyy-MM-dd}");
 
-                var productosVendidos = await _context.DetallesPedido
-                    .Where(d => d.Pedido.FechaPedido.Date >= desde.Date && 
-                               d.Pedido.FechaPedido.Date <= hasta.Date)
+                var detallesConProductos = await _context.DetallesPedido
+                    .Where(d => d.Pedido != null && 
+                               d.Pedido.FechaPedido.Date >= desde.Date && 
+                               d.Pedido.FechaPedido.Date <= hasta.Date &&
+                               d.Producto != null)
                     .Include(d => d.Producto)
-                    .Select(d => new
-                    {
-                        NombreProducto = d.Producto.NombreProducto,
-                        Cantidad = d.CantidadProducto,
-                        Subtotal = d.SubtotalProducto
-                    })
                     .ToListAsync();
+
+                var productosVendidos = detallesConProductos
+                    .Select(d => (
+                        NombreProducto: d.Producto?.NombreProducto ?? "Sin nombre",
+                        Cantidad: d.CantidadProducto,
+                        Subtotal: d.SubtotalProducto
+                    ))
+                    .ToList();
 
                 var tendencias = productosVendidos
                     .SelectMany(p => ExtraerColores(p.NombreProducto)
@@ -269,7 +309,7 @@ namespace TritoteNic.Controllers
                     .GroupBy(t => t.Color.ToLower())
                     .Select(g => new TendenciaColorDto
                     {
-                        Color = Capitalizar(g.Key),
+                        Color = Capitalizar(g.Key) ?? "",
                         CantidadVendida = g.Sum(t => t.Cantidad),
                         TotalVentas = g.Sum(t => t.Subtotal),
                         CantidadProductos = g.Count()

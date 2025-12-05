@@ -7,13 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { toast } from "sonner";
 import { Shield } from "lucide-react";
 import { ValidationHint } from "./ValidationHint";
-
-type UserRole = 'admin' | 'seller';
+import { apiService } from "../services/apiService";
+import type { RolDto } from "../types/api";
 
 interface NewUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUserCreated: (user: any) => void;
+  roles?: RolDto[];
 }
 
 const roleConfig = {
@@ -27,7 +28,7 @@ const roleConfig = {
   }
 };
 
-export function NewUserDialog({ open, onOpenChange, onUserCreated }: NewUserDialogProps) {
+export function NewUserDialog({ open, onOpenChange, onUserCreated, roles = [] }: NewUserDialogProps) {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -88,34 +89,61 @@ export function NewUserDialog({ open, onOpenChange, onUserCreated }: NewUserDial
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // FASE 1: VALIDACIONES
     if (!validateForm()) {
       toast.error('Por favor corrija los errores del formulario');
       return;
     }
 
-    // FASE 2: CREACIÓN DE ENTIDAD
-    const nuevoUsuario = {
-      id: Date.now(), // Simular ID autogenerado
-      name: nombre.trim(),
-      email: email.trim().toLowerCase(),
-      role: role as UserRole,
-      active: true,  // Nuevo usuario inicia activo
-      lastLogin: '-' // Sin acceso aún
-    };
-
-    // FASE 3: PERSISTENCIA (simulada)
-    onUserCreated(nuevoUsuario);
-
-    // Notificación de éxito
-    toast.success('Usuario creado exitosamente', {
-      description: `${nuevoUsuario.name} - ${roleConfig[nuevoUsuario.role].label}`
+    // Buscar el rol seleccionado
+    const rolSeleccionado = roles.find(r => {
+      const nombreRol = r.nombreRol?.toLowerCase() || '';
+      const roleLower = role.toLowerCase();
+      return nombreRol.includes(roleLower) || roleLower.includes(nombreRol);
     });
 
-    // Resetear formulario
-    resetForm();
-    onOpenChange(false);
+    if (!rolSeleccionado) {
+      toast.error('Rol no válido');
+      return;
+    }
+
+    try {
+      // FASE 2: CREAR USUARIO EN LA API
+      const usuarioCreado = await apiService.createUsuario({
+        nombreUsuario: nombre.trim(),
+        emailUsuario: email.trim().toLowerCase(),
+        contrasenaUsuario: password,
+        idRol: rolSeleccionado.idRol,
+        estadoUsuario: 'Activo' // Campo requerido
+      });
+
+      // FASE 3: NOTIFICAR ÉXITO Y CERRAR
+      toast.success('Usuario creado exitosamente', {
+        description: `${usuarioCreado.nombreUsuario}`
+      });
+
+      // Llamar callback con el usuario creado
+      const nuevoUsuario = {
+        id: usuarioCreado.idUsuario,
+        name: usuarioCreado.nombreUsuario || '',
+        email: usuarioCreado.emailUsuario || '',
+        role: role as any,
+        active: true,
+        lastLogin: '-',
+        idRol: usuarioCreado.idRol
+      };
+      onUserCreated(nuevoUsuario);
+
+      // Resetear formulario
+      resetForm();
+      onOpenChange(false);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al crear usuario";
+      toast.error("Error", {
+        description: errorMessage,
+      });
+    }
   };
 
   const resetForm = () => {
@@ -228,14 +256,21 @@ export function NewUserDialog({ open, onOpenChange, onUserCreated }: NewUserDial
                 <SelectValue placeholder="Seleccionar rol" />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(roleConfig).map(([key, config]) => (
-                  <SelectItem key={key} value={key}>
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4" />
-                      {config.label}
-                    </div>
-                  </SelectItem>
-                ))}
+                {roles.length > 0 ? (
+                  roles.map((rol) => {
+                    const roleKey = rol.nombreRol?.toLowerCase().includes('admin') ? 'admin' : 'seller';
+                    return (
+                      <SelectItem key={rol.idRol} value={roleKey}>
+                        <div className="flex items-center gap-2">
+                          <Shield className="h-4 w-4" />
+                          {rol.nombreRol}
+                        </div>
+                      </SelectItem>
+                    );
+                  })
+                ) : (
+                  <SelectItem value="" disabled>No hay roles disponibles</SelectItem>
+                )}
               </SelectContent>
             </Select>
             {errors.role && (

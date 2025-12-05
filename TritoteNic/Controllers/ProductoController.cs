@@ -37,8 +37,24 @@ namespace TritoteNic.Controllers
             try
             {
                 _logger.LogInformation("Obteniendo los Productos");
-                var productos = await _context.Productos.ToListAsync();
-                return Ok(_mapper.Map<IEnumerable<ProductoDto>>(productos));
+                var productos = await _context.Productos
+                    .Include(p => p.Categoria)
+                    .ToListAsync();
+                
+                var productosDto = productos.Select(p => new ProductoDto
+                {
+                    IdProducto = p.IdProducto,
+                    NombreProducto = p.NombreProducto,
+                    DescripcionProducto = p.DescripcionProducto,
+                    PrecioProducto = p.PrecioProducto,
+                    StockProducto = p.StockProducto,
+                    IdCategoria = p.IdCategoria,
+                    NombreCategoria = p.Categoria?.NombreCategoria,
+                    EstadoProducto = p.EstadoProducto,
+                    ImagenProducto = p.ImagenProducto
+                }).ToList();
+                
+                return Ok(productosDto);
             }
             catch (Exception ex)
             {

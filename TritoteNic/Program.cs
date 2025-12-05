@@ -7,6 +7,9 @@ using TritoteNic;
 using TritoteNic.Middleware;
 
 
+// Habilitar comportamiento legacy de timestamps para PostgreSQL (permite mezclar UTC y Local)
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -70,7 +73,11 @@ builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = options.DefaultPolicy;
 });
 
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
+    options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+});
 
 // CORS para WPF
 builder.Services.AddCors(options =>
@@ -128,6 +135,7 @@ app.UseCors("AllowWPF");
 app.UseExceptionHandling();
 
 app.UseAuthentication();
+app.UseUserStatusValidation(); // Validar estado del usuario en cada solicitud autenticada
 app.UseAuthorization();
 
 app.MapControllers();

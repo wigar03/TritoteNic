@@ -28,8 +28,10 @@ export interface ClienteDto {
   emailCliente: string | null;
   telefonoCliente: string | null;
   direccionCliente: string | null;
-  fechaCreacionCliente: string;
-  estadoCliente: string | null;
+  categoriaCliente?: string | null;
+  totalGastado: number;
+  fechaUltimoPedido?: string | null;
+  totalPedidos?: number | null;
 }
 
 export interface ClienteCreateDto {
@@ -65,21 +67,26 @@ export interface ProductoCreateDto {
   precioProducto: number;
   stockProducto: number;
   idCategoria: number;
+  estadoProducto: string;
+  imagenProducto?: string;
 }
 
 export interface ProductoUpdateDto {
+  idProducto: number;
   nombreProducto?: string;
   descripcionProducto?: string;
   precioProducto?: number;
   stockProducto?: number;
   idCategoria?: number;
-  estadoProducto?: string;
+  estadoProducto: string;
 }
 
 export interface PedidoDto {
   idPedido: number;
   idCliente: number;
   nombreCliente?: string | null;
+  idUsuario: number;
+  nombreUsuario?: string | null;
   fechaPedido: string;
   totalPedido: number;
   idEstadoPedido: number;
@@ -87,46 +94,93 @@ export interface PedidoDto {
   idMetodoPago: number;
   nombreMetodoPago?: string | null;
   detallesPedido?: DetallePedidoDto[];
+  detalles?: DetallePedidoDto[]; // Propiedad alternativa del backend
 }
 
 export interface PedidoCreateDto {
   idCliente: number;
+  idUsuario: number;
   idEstadoPedido: number;
   idMetodoPago: number;
-  detallesPedido: DetallePedidoCreateDto[];
+  subtotalPedido?: number;
+  descuento?: number;
+  totalPedido: number;
+  detalles: DetallePedidoCreateDto[];
 }
 
 export interface PedidoUpdateDto {
-  idCliente?: number;
-  idEstadoPedido?: number;
-  idMetodoPago?: number;
+  idPedido: number;
+  idEstadoPedido: number;
+  idMetodoPago: number;
+  totalPedido: number;
 }
 
 export interface DetallePedidoDto {
-  idDetallePedido: number;
+  idDetallePedido?: number;
+  idDetalle?: number;
   idPedido: number;
   idProducto: number;
   nombreProducto?: string | null;
-  cantidadDetallePedido: number;
-  precioUnitarioDetallePedido: number;
-  subtotalDetallePedido: number;
+  cantidadDetallePedido?: number;
+  cantidadProducto?: number;
+  precioUnitarioDetallePedido?: number;
+  precioUnitarioProducto?: number;
+  subtotalDetallePedido?: number;
+  subtotalProducto?: number;
 }
 
 export interface DetallePedidoCreateDto {
   idProducto: number;
-  cantidadDetallePedido: number;
-  precioUnitarioDetallePedido: number;
+  cantidadProducto: number;
+  precioUnitarioProducto: number;
+  subtotalProducto?: number;
 }
 
 export interface DashboardDto {
-  totalVentas: number;
-  totalPedidos: number;
-  totalClientes: number;
-  totalProductos: number;
+  ventasKpi?: VentasKpiDto;
+  pedidosKpi?: PedidosKpiDto;
+  alertas?: AlertaDto[];
+  ventasDiarias?: VentasDiariasDto[];
+  productosMasVendidos?: ProductoVendidoDto[];
+}
+
+export interface VentasKpiDto {
+  ventasDia: number;
+  ventasSemana: number;
+  ventasMes: number;
+  porcentajeCambioDia: number;
+  porcentajeCambioSemana: number;
+  porcentajeCambioMes: number;
+}
+
+export interface PedidosKpiDto {
+  pedidosActivos: number;
   pedidosPendientes: number;
-  pedidosCompletados: number;
-  ventasMensuales: number;
-  ventasSemanal: number;
+  pedidosEnProceso: number;
+  totalPedidos: number;
+}
+
+export interface AlertaDto {
+  tipo?: string;
+  mensaje?: string;
+  idProducto?: number;
+  nombreProducto?: string;
+  stockActual?: number;
+  idPedido?: number;
+  diasRetraso?: number;
+}
+
+export interface VentasDiariasDto {
+  fecha: string;
+  totalVentas: number;
+  cantidadPedidos: number;
+}
+
+export interface ProductoVendidoDto {
+  idProducto: number;
+  nombreProducto?: string;
+  cantidadVendida: number;
+  totalVentas: number;
 }
 
 export interface CategoriaDto {
@@ -159,6 +213,7 @@ export interface UsuarioCreateDto {
   emailUsuario: string;
   contrasenaUsuario: string;
   idRol: number;
+  estadoUsuario: string;
 }
 
 export interface UsuarioUpdateDto {
@@ -170,9 +225,51 @@ export interface UsuarioUpdateDto {
 }
 
 export interface AnalisisCompletoDto {
-  ventasPorMes: Array<{ mes: string; ventas: number }>;
-  productosMasVendidos: Array<{ nombreProducto: string; cantidad: number }>;
-  clientesMasFrecuentes: Array<{ nombreCliente: string; totalPedidos: number }>;
-  categoriaMasVendida: string | null;
+  comparativaVentas?: ComparativaVentasDto;
+  tendenciasColor?: TendenciaColorDto[];
+  tendenciasTemporada?: TendenciaTemporadaDto[];
+  productosRotacion?: RotacionProductoDto[];
+}
+
+export interface ComparativaVentasDto {
+  ventasSemanales?: ReporteVentasDto[];
+  totalPeriodoActual: number;
+  totalPeriodoAnterior: number;
+  porcentajeCambio: number;
+}
+
+export interface ReporteVentasDto {
+  periodo: string;
+  ventasActuales: number;
+  ventasAnteriores: number;
+  porcentajeCambio: number;
+  fechaInicio: string;
+  fechaFin: string;
+}
+
+export interface TendenciaColorDto {
+  color: string;
+  cantidadVendida: number;
+  totalVentas: number;
+  porcentajeVentas: number;
+  cantidadProductos: number;
+}
+
+export interface TendenciaTemporadaDto {
+  mes: number;
+  nombreMes: string;
+  totalVentas: number;
+  cantidadPedidos: number;
+  promedioVenta: number;
+}
+
+export interface RotacionProductoDto {
+  idProducto: number;
+  nombreProducto: string;
+  categoria: string;
+  cantidadVendida: number;
+  totalVentas: number;
+  rotacion: number;
+  tipoRotacion: string;
 }
 

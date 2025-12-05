@@ -377,8 +377,31 @@ namespace TritoteNic.Controllers
                     cliente.DireccionCliente
                 };
 
+                // Eliminar pedidos asociados al cliente
+                var pedidosAsociados = await _context.Pedidos
+                    .Where(p => p.IdCliente == id)
+                    .Include(p => p.Detalles)
+                    .ToListAsync();
+
+                int cantidadPedidosEliminados = pedidosAsociados.Count;
+
+                foreach (var pedido in pedidosAsociados)
+                {
+                    // Eliminar detalles del pedido primero
+                    if (pedido.Detalles != null && pedido.Detalles.Any())
+                    {
+                        _context.DetallesPedido.RemoveRange(pedido.Detalles);
+                    }
+                    
+                    // Eliminar el pedido
+                    _context.Pedidos.Remove(pedido);
+                }
+
+                // Eliminar el cliente
                 _context.Clientes.Remove(cliente);
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Se eliminaron {cantidadPedidosEliminados} pedidos asociados al cliente con ID {id}");
 
                 // Registrar en bitácora
                 await _bitacoraService.RegistrarCambioAsync(

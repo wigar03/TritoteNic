@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -6,8 +6,9 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Minus, Plus, ShoppingCart, FileText } from "lucide-react";
+import { Minus, Plus, ShoppingCart, FileText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Product {
   id: number;
@@ -18,32 +19,72 @@ interface Product {
   image: string;
 }
 
-const mockProducts: Product[] = [
-  { id: 1, name: 'Tote Bag Clásico Beige', price: 450, stock: 25, category: 'Canvas', image: 'https://images.unsplash.com/photo-1574365569389-a10d488ca3fb?w=200&h=200&fit=crop' },
-  { id: 2, name: 'Tote Bag Eco Natural', price: 520, stock: 18, category: 'Ecológico', image: 'https://images.unsplash.com/photo-1758708536099-9f46dc81fffc?w=200&h=200&fit=crop' },
-  { id: 3, name: 'Tote Bag Shopping Negro', price: 480, stock: 30, category: 'Canvas', image: 'https://images.unsplash.com/photo-1759463408569-c81a969a6c3d?w=200&h=200&fit=crop' },
-  { id: 4, name: 'Tote Bag Playero Azul', price: 580, stock: 15, category: 'Playa', image: 'https://images.unsplash.com/photo-1465742744535-bac796b80f3a?w=200&h=200&fit=crop' },
-  { id: 5, name: 'Tote Bag Minimalista Blanco', price: 550, stock: 22, category: 'Minimalista', image: 'https://images.unsplash.com/photo-1647426112650-6c96ce7ab5f0?w=200&h=200&fit=crop' },
-  { id: 6, name: 'Tote Bag Market Kraft', price: 420, stock: 28, category: 'Market', image: 'https://images.unsplash.com/photo-1663154438413-244fae34c9a7?w=200&h=200&fit=crop' },
-];
-
 interface CartItem extends Product {
   quantity: number;
 }
 
+import { apiService } from "../services/apiService";
+import type { ClienteDto, ProductoDto, EstadoPedidoDto, MetodoPagoDto } from "../types/api";
+
 interface NewOrderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  clientes?: ClienteDto[];
+  productos?: ProductoDto[];
+  estadosPedido?: EstadoPedidoDto[];
+  metodosPago?: MetodoPagoDto[];
+  onOrderCreated?: () => void;
 }
 
-export function NewOrderDialog({ open, onOpenChange }: NewOrderDialogProps) {
+export function NewOrderDialog({ 
+  open, 
+  onOpenChange, 
+  clientes = [], 
+  productos: productosProp = [], 
+  estadosPedido = [], 
+  metodosPago = [],
+  onOrderCreated 
+}: NewOrderDialogProps) {
+  const { currentUser, isLoading: authLoading } = useAuth();
   const [step, setStep] = useState(1);
-  const [customer, setCustomer] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('');
+  const [selectedClienteId, setSelectedClienteId] = useState<string>('');
+  const [selectedMetodoPagoId, setSelectedMetodoPagoId] = useState<string>('');
+  const [selectedEstadoPedidoId, setSelectedEstadoPedidoId] = useState<string>('');
+  const [productos, setProductos] = useState<ProductoDto[]>(productosProp);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [discount, setDiscount] = useState(0);
+  const [discountInput, setDiscountInput] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const addToCart = (product: Product) => {
+  useEffect(() => {
+    if (open && productosProp.length === 0) {
+      loadProductos();
+    } else if (productosProp.length > 0) {
+      setProductos(productosProp);
+    }
+  }, [open, productosProp]);
+
+  const loadProductos = async () => {
+    try {
+      const productosData = await apiService.getProductos();
+      if (productosData) {
+        setProductos(productosData);
+      }
+    } catch (error) {
+      console.error("Error al cargar productos:", error);
+    }
+  };
+
+  const addToCart = (producto: ProductoDto) => {
+    const product: Product = {
+      id: producto.idProducto,
+      name: producto.nombreProducto || '',
+      price: Number(producto.precioProducto),
+      stock: producto.stockProducto,
+      category: producto.nombreCategoria || '',
+      image: producto.imagenProducto || 'https://via.placeholder.com/200'
+    };
+    
     const existing = cart.find(item => item.id === product.id);
     if (existing) {
       if (existing.quantity < product.stock) {
@@ -59,18 +100,26 @@ export function NewOrderDialog({ open, onOpenChange }: NewOrderDialogProps) {
   };
 
   const updateQuantity = (productId: number, delta: number) => {
-    setCart(cart.map(item => {
-      if (item.id === productId) {
-        const newQuantity = item.quantity + delta;
-        if (newQuantity <= 0) return item;
-        if (newQuantity > item.stock) {
-          toast.error('Stock insuficiente');
-          return item;
+    setCart(currentCart => {
+      const updatedCart = currentCart.map(item => {
+        if (item.id === productId) {
+          const newQuantity = item.quantity + delta;
+          if (newQuantity <= 0) {
+            // Retornar null para indicar que debe eliminarse
+            return null;
+          }
+          if (newQuantity > item.stock) {
+            toast.error('Stock insuficiente');
+            return item;
+          }
+          return { ...item, quantity: newQuantity };
         }
-        return { ...item, quantity: newQuantity };
-      }
-      return item;
-    }).filter(item => item.quantity > 0));
+        return item;
+      });
+      
+      // Filtrar los nulls (productos eliminados)
+      return updatedCart.filter((item): item is CartItem => item !== null && item.quantity > 0);
+    });
   };
 
   const removeFromCart = (productId: number) => {
@@ -83,18 +132,104 @@ export function NewOrderDialog({ open, onOpenChange }: NewOrderDialogProps) {
   const iva = subtotalAfterDiscount * 0.15; // IVA del 15%
   const total = subtotalAfterDiscount + iva;
 
-  const handleConfirm = () => {
-    toast.success('Pedido creado exitosamente', {
-      description: `Pedido para ${customer} por $${total.toLocaleString()}`,
-    });
-    onOpenChange(false);
-    resetForm();
+  const handleConfirm = async () => {
+    if (!selectedClienteId || !selectedMetodoPagoId || !selectedEstadoPedidoId) {
+      toast.error('Por favor completa todos los campos requeridos');
+      return;
+    }
+
+    if (cart.length === 0) {
+      toast.error('El pedido debe tener al menos un producto');
+      return;
+    }
+
+    // Esperar a que termine la carga de autenticación
+    if (authLoading) {
+      toast.info('Verificando autenticación...');
+      return;
+    }
+
+    // Obtener el ID del usuario (del contexto o del localStorage como fallback)
+    let userId: number | null = null;
+    
+    if (currentUser && currentUser.id) {
+      userId = currentUser.id;
+    } else {
+      // Intentar obtener del localStorage como respaldo
+      const storedUser = localStorage.getItem('auth_user');
+      if (storedUser) {
+        try {
+          const usuario: any = JSON.parse(storedUser);
+          if (usuario && usuario.idUsuario) {
+            userId = usuario.idUsuario;
+            console.log('Usuario obtenido del localStorage:', userId);
+          }
+        } catch (error) {
+          console.error('Error al parsear usuario del storage:', error);
+        }
+      }
+    }
+
+    // Validar que tenemos un ID de usuario
+    if (!userId) {
+      toast.error('Debes estar autenticado para crear un pedido. Por favor, recarga la página o inicia sesión nuevamente.');
+      console.error('No se pudo obtener el ID del usuario:', { currentUser, authLoading, token: apiService.getToken() });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // Crear detalles del pedido
+      const detalles = cart.map(item => ({
+        idProducto: item.id,
+        cantidadProducto: item.quantity,
+        precioUnitarioProducto: item.price,
+        subtotalProducto: item.price * item.quantity
+      }));
+
+      // Calcular subtotal y total
+      const subtotal = detalles.reduce((sum, detalle) => sum + (detalle.subtotalProducto || 0), 0);
+      const descuentoFinal = discount || 0; // Usar el descuento del estado
+      const totalPedido = subtotal * (1 - descuentoFinal / 100);
+
+      // Crear el pedido
+      await apiService.createPedido({
+        idCliente: parseInt(selectedClienteId),
+        idUsuario: userId,
+        idEstadoPedido: parseInt(selectedEstadoPedidoId),
+        idMetodoPago: parseInt(selectedMetodoPagoId),
+        subtotalPedido: subtotal,
+        descuento: descuentoFinal,
+        totalPedido: totalPedido,
+        detalles: detalles
+      });
+
+      toast.success('Pedido creado exitosamente', {
+        description: `Total: $${total.toLocaleString()}`,
+      });
+      
+      if (onOrderCreated) {
+        onOrderCreated();
+      }
+      
+      onOpenChange(false);
+      resetForm();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al crear pedido";
+      toast.error("Error", {
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resetForm = () => {
     setStep(1);
-    setCustomer('');
-    setPaymentMethod('');
+    setSelectedClienteId('');
+    setSelectedMetodoPagoId('');
+    setSelectedEstadoPedidoId('');
     setCart([]);
     setDiscount(0);
   };
@@ -118,30 +253,66 @@ export function NewOrderDialog({ open, onOpenChange }: NewOrderDialogProps) {
         {step === 1 && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Cliente</Label>
-              <Input
-                placeholder="Nombre del cliente"
-                value={customer}
-                onChange={(e) => setCustomer(e.target.value)}
-              />
+              <Label>Cliente *</Label>
+              <Select value={selectedClienteId} onValueChange={setSelectedClienteId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar cliente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clientes.length > 0 ? (
+                    clientes.map((cliente) => (
+                      <SelectItem key={cliente.idCliente} value={cliente.idCliente.toString()}>
+                        {cliente.nombreCliente} - {cliente.emailCliente}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>No hay clientes disponibles</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
-              <Label>Método de Pago</Label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+              <Label>Estado del Pedido *</Label>
+              <Select value={selectedEstadoPedidoId} onValueChange={setSelectedEstadoPedidoId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  {estadosPedido.length > 0 ? (
+                    estadosPedido.map((estado) => (
+                      <SelectItem key={estado.idEstadoPedido} value={estado.idEstadoPedido.toString()}>
+                        {estado.nombreEstadoPedido}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>No hay estados disponibles</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Método de Pago *</Label>
+              <Select value={selectedMetodoPagoId} onValueChange={setSelectedMetodoPagoId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar método" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="cash">Efectivo</SelectItem>
-                  <SelectItem value="transfer">Transferencia</SelectItem>
-                  <SelectItem value="card">Tarjeta</SelectItem>
+                  {metodosPago.length > 0 ? (
+                    metodosPago.map((metodo) => (
+                      <SelectItem key={metodo.idMetodoPago} value={metodo.idMetodoPago.toString()}>
+                        {metodo.nombreMetodoPago}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>No hay métodos de pago disponibles</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
             <div className="flex justify-end">
               <Button
                 onClick={() => setStep(2)}
-                disabled={!customer || !paymentMethod}
+                disabled={!selectedClienteId || !selectedMetodoPagoId || !selectedEstadoPedidoId}
                 className="bg-[#C9A664] hover:bg-[#B8965A]"
               >
                 Siguiente
@@ -154,24 +325,27 @@ export function NewOrderDialog({ open, onOpenChange }: NewOrderDialogProps) {
         {step === 2 && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {mockProducts.map((product) => (
-                <Card key={product.id} className="overflow-hidden">
+              {productos.filter(p => p.estadoProducto === 'Activo' && p.stockProducto > 0).map((producto) => (
+                <Card key={producto.idProducto} className="overflow-hidden">
                   <img
-                    src={product.image}
-                    alt={product.name}
+                    src={producto.imagenProducto || 'https://via.placeholder.com/200'}
+                    alt={producto.nombreProducto || 'Producto'}
                     className="w-full h-32 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200';
+                    }}
                   />
                   <div className="p-3 space-y-2">
-                    <h4 className="text-sm">{product.name}</h4>
+                    <h4 className="text-sm font-medium">{producto.nombreProducto}</h4>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">${product.price.toLocaleString()}</span>
+                      <span className="text-sm font-medium text-[#C9A664]">${Number(producto.precioProducto).toLocaleString()}</span>
                       <Badge variant="outline" className="text-xs">
-                        Stock: {product.stock}
+                        Stock: {producto.stockProducto}
                       </Badge>
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => addToCart(product)}
+                      onClick={() => addToCart(producto)}
                       className="w-full bg-[#C9A664] hover:bg-[#B8965A]"
                     >
                       <Plus className="h-3 w-3 mr-1" />
@@ -204,6 +378,14 @@ export function NewOrderDialog({ open, onOpenChange }: NewOrderDialogProps) {
                         <Button size="sm" variant="outline" onClick={() => updateQuantity(item.id, 1)}>
                           <Plus className="h-3 w-3" />
                         </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -234,11 +416,15 @@ export function NewOrderDialog({ open, onOpenChange }: NewOrderDialogProps) {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Cliente:</span>
-                  <span>{customer}</span>
+                  <span>{clientes.find(c => c.idCliente.toString() === selectedClienteId)?.nombreCliente || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Estado:</span>
+                  <span>{estadosPedido.find(e => e.idEstadoPedido.toString() === selectedEstadoPedidoId)?.nombreEstadoPedido || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Método de pago:</span>
-                  <span className="capitalize">{paymentMethod === 'cash' ? 'Efectivo' : paymentMethod === 'transfer' ? 'Transferencia' : 'Tarjeta'}</span>
+                  <span>{metodosPago.find(m => m.idMetodoPago.toString() === selectedMetodoPagoId)?.nombreMetodoPago || 'N/A'}</span>
                 </div>
               </div>
             </Card>
@@ -258,11 +444,50 @@ export function NewOrderDialog({ open, onOpenChange }: NewOrderDialogProps) {
             <div className="space-y-2">
               <Label>Descuento (%)</Label>
               <Input
-                type="number"
-                min="0"
-                max="100"
-                value={discount}
-                onChange={(e) => setDiscount(Math.min(100, Math.max(0, Number(e.target.value))))}
+                type="text"
+                inputMode="numeric"
+                value={discountInput}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  
+                  // Permitir borrar todo el contenido (permite escribir desde cero)
+                  if (value === '') {
+                    setDiscountInput('');
+                    setDiscount(0);
+                    return;
+                  }
+
+                  // Solo permitir números enteros (0-100)
+                  if (!/^\d*$/.test(value)) {
+                    return;
+                  }
+
+                  const numValue = parseInt(value);
+                  if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+                    setDiscountInput(value);
+                    setDiscount(numValue);
+                  }
+                }}
+                onBlur={() => {
+                  // Validar cuando el usuario sale del campo
+                  if (discountInput === '' || discountInput.trim() === '') {
+                    setDiscountInput('0');
+                    setDiscount(0);
+                  } else {
+                    const numValue = parseInt(discountInput);
+                    if (isNaN(numValue) || numValue < 0) {
+                      setDiscountInput('0');
+                      setDiscount(0);
+                    } else if (numValue > 100) {
+                      setDiscountInput('100');
+                      setDiscount(100);
+                    } else {
+                      setDiscountInput(numValue.toString());
+                      setDiscount(numValue);
+                    }
+                  }
+                }}
+                placeholder="0"
               />
             </div>
 
@@ -302,8 +527,8 @@ export function NewOrderDialog({ open, onOpenChange }: NewOrderDialogProps) {
                   <FileText className="h-4 w-4 mr-2" />
                   Generar PDF
                 </Button>
-                <Button onClick={handleConfirm} className="bg-[#C9A664] hover:bg-[#B8965A]">
-                  Confirmar Pedido
+                <Button onClick={handleConfirm} disabled={isLoading} className="bg-[#C9A664] hover:bg-[#B8965A]">
+                  {isLoading ? 'Creando...' : 'Confirmar Pedido'}
                 </Button>
               </div>
             </div>

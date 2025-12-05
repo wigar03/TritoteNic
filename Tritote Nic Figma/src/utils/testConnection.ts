@@ -3,7 +3,12 @@ import { API_CONFIG } from '../config/api';
 
 export async function testApiConnection(): Promise<{ success: boolean; message: string }> {
   try {
-    const response = await fetch(`${API_CONFIG.baseURL.replace('/api', '')}/api/Health`, {
+    // Construir la URL correctamente
+    const baseUrl = API_CONFIG.baseURL.endsWith('/api') 
+      ? API_CONFIG.baseURL.replace('/api', '') 
+      : API_CONFIG.baseURL.replace(/\/api\/?$/, '');
+    
+    const response = await fetch(`${baseUrl}/api/Health`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

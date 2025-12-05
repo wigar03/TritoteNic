@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { toast } from "sonner";
+import type { RolDto } from "../types/api";
 
 type UserRole = 'admin' | 'seller';
 
@@ -15,6 +16,7 @@ interface User {
   role: UserRole;
   active: boolean;
   lastLogin: string;
+  idRol: number;
 }
 
 interface EditUserDialogProps {
@@ -22,16 +24,18 @@ interface EditUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUserEdited: (user: User) => void;
+  roles?: RolDto[];
 }
 
-export function EditUserDialog({ user, open, onOpenChange, onUserEdited }: EditUserDialogProps) {
+export function EditUserDialog({ user, open, onOpenChange, onUserEdited, roles = [] }: EditUserDialogProps) {
   const [formData, setFormData] = useState<User>({
     id: 0,
     name: '',
     email: '',
     role: 'seller',
     active: true,
-    lastLogin: ''
+    lastLogin: '',
+    idRol: 0
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -116,15 +120,28 @@ export function EditUserDialog({ user, open, onOpenChange, onUserEdited }: EditU
           <div className="space-y-2">
             <Label htmlFor="edit-role">Rol *</Label>
             <Select
-              value={formData.role}
-              onValueChange={(value: 'admin' | 'seller') => setFormData({ ...formData, role: value })}
+              value={formData.idRol.toString()}
+              onValueChange={(value) => {
+                const rolSeleccionado = roles.find(r => r.idRol.toString() === value);
+                if (rolSeleccionado) {
+                  const roleKey = rolSeleccionado.nombreRol?.toLowerCase().includes('admin') ? 'admin' : 'seller';
+                  setFormData({ ...formData, idRol: rolSeleccionado.idRol, role: roleKey });
+                }
+              }}
             >
               <SelectTrigger id="edit-role">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Administrador</SelectItem>
-                <SelectItem value="seller">Vendedor</SelectItem>
+                {roles.length > 0 ? (
+                  roles.map((rol) => (
+                    <SelectItem key={rol.idRol} value={rol.idRol.toString()}>
+                      {rol.nombreRol}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="" disabled>No hay roles disponibles</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>

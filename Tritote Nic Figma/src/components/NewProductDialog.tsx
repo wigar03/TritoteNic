@@ -6,22 +6,16 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { toast } from "sonner";
 
+import type { CategoriaDto } from "../types/api";
+
 interface NewProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onProductCreated: (product: any) => void;
+  categorias?: CategoriaDto[];
 }
 
-const categories = [
-  "Canvas",
-  "Ecológico",
-  "Playa",
-  "Minimalista",
-  "Market",
-  "Premium"
-];
-
-export function NewProductDialog({ open, onOpenChange, onProductCreated }: NewProductDialogProps) {
+export function NewProductDialog({ open, onOpenChange, onProductCreated, categorias = [] }: NewProductDialogProps) {
   const [nombre, setNombre] = useState('');
   const [categoria, setCategoria] = useState('');
   const [precio, setPrecio] = useState('');
@@ -65,16 +59,19 @@ export function NewProductDialog({ open, onOpenChange, onProductCreated }: NewPr
     }
 
     // FASE 2: CREACIÓN DE ENTIDAD
+    const categoriaSeleccionada = categorias.find(c => c.nombreCategoria === categoria || c.idCategoria.toString() === categoria);
     const nuevoProducto = {
-      id: Date.now(), // Simular ID autogenerado
+      id: 0, // Se asignará desde la API
       name: nombre.trim(),
-      category: categoria,
+      category: categoriaSeleccionada?.nombreCategoria || categoria,
       price: parseFloat(precio),
       stock: parseInt(stock),
-      image: `https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop` // Imagen por defecto
+      image: `https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop`, // Imagen por defecto
+      idCategoria: categoriaSeleccionada?.idCategoria || parseInt(categoria),
+      estadoProducto: 'Activo' // Estado por defecto al crear
     };
 
-    // FASE 3: PERSISTENCIA (simulada)
+    // FASE 3: PERSISTENCIA (se guarda en la base de datos mediante onProductCreated)
     onProductCreated(nuevoProducto);
 
     // Notificación de éxito
@@ -136,11 +133,15 @@ export function NewProductDialog({ open, onOpenChange, onProductCreated }: NewPr
                 <SelectValue placeholder="Seleccionar categoría" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
+                {categorias.length > 0 ? (
+                  categorias.map((cat) => (
+                    <SelectItem key={cat.idCategoria} value={cat.idCategoria.toString()}>
+                      {cat.nombreCategoria}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="" disabled>No hay categorías disponibles</SelectItem>
+                )}
               </SelectContent>
             </Select>
             {errors.categoria && (

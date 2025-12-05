@@ -5,11 +5,11 @@ namespace SharedModels.Dto
 {
     public class DashboardDto
     {
-        public VentasKpiDto? VentasKpi { get; set; }
-        public PedidosKpiDto? PedidosKpi { get; set; }
-        public List<AlertaDto>? Alertas { get; set; }
-        public List<VentasDiariasDto>? VentasDiarias { get; set; }
-        public List<ProductoVendidoDto>? ProductosMasVendidos { get; set; }
+        public VentasKpiDto VentasKpi { get; set; } = new VentasKpiDto();
+        public PedidosKpiDto PedidosKpi { get; set; } = new PedidosKpiDto();
+        public List<AlertaDto> Alertas { get; set; } = new List<AlertaDto>();
+        public List<VentasDiariasDto> VentasDiarias { get; set; } = new List<VentasDiariasDto>();
+        public List<ProductoVendidoDto> ProductosMasVendidos { get; set; } = new List<ProductoVendidoDto>();
     }
 
     public class VentasKpiDto

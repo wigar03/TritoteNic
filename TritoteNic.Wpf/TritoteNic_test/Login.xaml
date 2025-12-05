@@ -1,0 +1,39 @@
+﻿<Window x:Class="TritoteNic_test.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TritoteNic_test"
+        mc:Ignorable="d"
+        Title="TritoteNic" Height="450" Width="400">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Tritote Nicaragua"
+                   FontSize="22" FontWeight="Bold"
+                   HorizontalAlignment="Center" Margin="0,10" />
+        <TextBlock Text="Sistema de Gestión de Pedidos"
+                   FontSize="14" Foreground="Gray"
+                   HorizontalAlignment="Center" Grid.Row="0" Margin="0,40,0,0"/>
+        <StackPanel Grid.Row="1" VerticalAlignment="Center">
+            <TextBlock Text="Email" Margin="0,0,0,10"/>
+            <TextBox Width="250" Height="30" Name="txtEmail" Margin="0,0,0,10"/>
+            <TextBlock Text="Contraseña" Margin="0,0,0,10"/>
+            <PasswordBox Width="250" Height="30" Name="txtPassword" Margin="0,0,0,10"/>
+            <Button Content="Iniciar Sesión"
+                    Width="250" Height="30"
+                    Background="#007ACC" Foreground="White"
+                    FontWeight="Bold" Margin="0,10,0,0"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Margin="0,20,0,0">
+            <TextBlock Text="Usuarios de prueba" FontWeight="Bold"/>
+            <TextBlock Text="admin@tritote.com.ni - admin123"/>
+            <TextBlock Text="vendedor1@tritoe.com.ni - vendedor123"/>
+            <TextBlock Text="vendedor2@tritote.com.ni - vendedor123"/>
+            <TextBlock Text="analista@tritote.com.ni - analista123"/>
+        </StackPanel>
+    </Grid>
+</Window>

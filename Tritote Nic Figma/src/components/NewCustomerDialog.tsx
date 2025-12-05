@@ -63,7 +63,7 @@ export function NewCustomerDialog({ open, onOpenChange, onCustomerCreated }: New
       categoriaCliente: null    // Sin categoría (se asigna automáticamente cuando gaste > $0)
     };
 
-    // FASE 3: PERSISTENCIA (simulada)
+    // FASE 3: PERSISTENCIA (se guarda en la base de datos mediante onCustomerCreated)
     onCustomerCreated(nuevoCliente);
 
     // Notificación de éxito

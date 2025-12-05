@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -12,6 +12,8 @@ import { EditUserDialog } from "./EditUserDialog";
 import { UserDetailsDialog } from "./UserDetailsDialog";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { usePermissions, useAuth } from "../contexts/AuthContext";
+import { apiService } from "../services/apiService";
+import type { UsuarioDto, RolDto } from "../types/api";
 
 type UserRole = 'admin' | 'seller';
 
@@ -22,34 +24,8 @@ interface User {
   role: UserRole;
   active: boolean;
   lastLogin: string;
+  idRol: number;
 }
-
-const mockUsers: User[] = [
-  {
-    id: 1,
-    name: 'William Garcia',
-    email: 'william.garcia@tritote.com.ni',
-    role: 'admin',
-    active: true,
-    lastLogin: '2024-01-15'
-  },
-  {
-    id: 2,
-    name: 'Andres Gonzalez',
-    email: 'andres.gonzalez@tritote.com.ni',
-    role: 'seller',
-    active: true,
-    lastLogin: '2024-01-14'
-  },
-  {
-    id: 3,
-    name: 'Maria Rodriguez',
-    email: 'maria.rodriguez@tritote.com.ni',
-    role: 'seller',
-    active: true,
-    lastLogin: '2024-01-13'
-  }
-];
 
 const roleLabels = {
   admin: 'Administrador',
@@ -61,21 +37,18 @@ const roleColors = {
   seller: 'bg-blue-100 text-blue-800 border-blue-200'
 };
 
-const roleConfig = {
-  admin: { 
-    label: 'Administrador',
-    className: 'bg-purple-100 text-purple-800 border-purple-200',
-    permissions: ['Acceso total', 'Gestionar usuarios', 'Gestionar productos', 'Reportes', 'Pedidos'] 
-  },
-  seller: { 
-    label: 'Vendedor',
-    className: 'bg-blue-100 text-blue-800 border-blue-200',
-    permissions: ['Crear pedidos', 'Ver productos', 'Crear/editar clientes', 'Ver reportes', 'Ver dashboard'] 
-  }
+// Función para mapear nombre de rol a UserRole
+const mapRolToUserRole = (nombreRol: string | null | undefined): UserRole => {
+  if (!nombreRol) return 'seller';
+  const rol = nombreRol.toLowerCase();
+  if (rol.includes('admin') || rol.includes('administrador')) return 'admin';
+  return 'seller';
 };
 
 export function UserManagement() {
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<RolDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserRole>('admin');
   const [newUserOpen, setNewUserOpen] = useState(false);
@@ -84,72 +57,143 @@ export function UserManagement() {
   const [viewUserOpen, setViewUserOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const { hasPermission } = usePermissions();
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    loadUsers();
+    loadRoles();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const usuarios = await apiService.getUsuarios();
+      if (usuarios) {
+        const mappedUsers: User[] = usuarios.map(u => ({
+          id: u.idUsuario,
+          name: u.nombreUsuario || '',
+          email: u.emailUsuario || '',
+          role: mapRolToUserRole(u.nombreRol),
+          active: u.estadoUsuario === 'Activo',
+          lastLogin: u.ultimoAcceso ? new Date(u.ultimoAcceso).toISOString().split('T')[0] : '-',
+          idRol: u.idRol
+        }));
+        setUsers(mappedUsers);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al cargar usuarios";
+      toast.error("Error", {
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadRoles = async () => {
+    try {
+      const rolesData = await apiService.getRoles();
+      if (rolesData) {
+        setRoles(rolesData);
+      }
+    } catch (error) {
+      console.error("Error al cargar roles:", error);
+    }
+  };
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const toggleUserStatus = (userId: number) => {
+  const toggleUserStatus = async (userId: number) => {
     if (!hasPermission('usuarios.edit')) {
       toast.error('No tienes permisos para modificar usuarios');
       return;
     }
-    setUsers(users.map(user =>
-      user.id === userId ? { ...user, active: !user.active } : user
-    ));
-    toast.success('Estado de usuario actualizado');
-  };
+    
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
 
-  const handleDelete = (userId: number) => {
-    if (!hasPermission('usuarios.delete')) {
-      toast.error('No tienes permisos para eliminar usuarios');
-      return;
+    try {
+      await apiService.updateUsuario(userId, {
+        estadoUsuario: user.active ? 'Inactivo' : 'Activo'
+      });
+      toast.success(`Usuario ${user.active ? 'desactivado' : 'activado'} exitosamente`);
+      await loadUsers(); // Recargar desde la API
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al actualizar usuario";
+      toast.error("Error", {
+        description: errorMessage,
+      });
     }
-    setUsers(users.filter(u => u.id !== userId));
-    toast.success('Usuario eliminado');
   };
 
-  const handleUserCreated = (newUser: User) => {
-    // FASE 3: PERSISTENCIA - Agregar usuario al estado
-    setUsers([...users, newUser]);
+  const handleUserCreated = async (newUser: User) => {
+    try {
+      // El diálogo ya creó el usuario, solo recargar
+      await loadUsers();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al crear usuario";
+      toast.error("Error", {
+        description: errorMessage,
+      });
+    }
   };
 
-  const handleUserEdited = (editedUser: User) => {
-    // FASE 3: PERSISTENCIA - Actualizar usuario en el estado
-    setUsers(users.map(u =>
-      u.id === editedUser.id ? editedUser : u
-    ));
+  const handleUserEdited = async (editedUser: User) => {
+    try {
+      await apiService.updateUsuario(editedUser.id, {
+        nombreUsuario: editedUser.name,
+        emailUsuario: editedUser.email,
+        idRol: editedUser.idRol
+      });
+      toast.success('Usuario actualizado exitosamente');
+      await loadUsers(); // Recargar desde la API
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al actualizar usuario";
+      toast.error("Error", {
+        description: errorMessage,
+      });
+    }
   };
 
-  const handleDeleteUser = (userId: number) => {
-    // Verificar si es el usuario actual
-    if (user && user.email === users.find(u => u.id === userId)?.email) {
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+    
+    // No permitir eliminar el usuario actual
+    if (currentUser && selectedUser.id === currentUser.id) {
       toast.error('No puedes eliminar tu propio usuario');
+      setDeleteUserOpen(false);
+      setSelectedUser(null);
       return;
     }
-    setDeleteUserOpen(true);
-    setSelectedUser(users.find(user => user.id === userId) || null);
-  };
 
-  const handleConfirmDelete = () => {
-    if (selectedUser) {
-      handleDelete(selectedUser.id);
+    try {
+      await apiService.deleteUsuario(selectedUser.id);
+      toast.success('Usuario eliminado exitosamente');
+      await loadUsers(); // Recargar desde la API
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al eliminar usuario";
+      toast.error("Error", {
+        description: errorMessage,
+      });
+    } finally {
+      setDeleteUserOpen(false);
+      setSelectedUser(null);
     }
-    setDeleteUserOpen(false);
-    setSelectedUser(null);
   };
 
-  const handleEditUser = (userId: number) => {
-    setEditUserOpen(true);
-    setSelectedUser(users.find(user => user.id === userId) || null);
-  };
-
-  const handleViewUser = (userId: number) => {
-    setViewUserOpen(true);
-    setSelectedUser(users.find(user => user.id === userId) || null);
-  };
+  if (isLoading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C9A664] mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando usuarios...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -157,7 +201,7 @@ export function UserManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h1>Gestión de Usuarios</h1>
-          <p className="text-muted-foreground">Administra usuarios y permisos del sistema</p>
+          <p className="text-muted-foreground">Administra los usuarios del sistema</p>
         </div>
         <Button 
           onClick={() => setNewUserOpen(true)}
@@ -169,28 +213,36 @@ export function UserManagement() {
         </Button>
       </div>
 
-      {/* Roles y permisos */}
+      {/* Estadísticas */}
       <div className="grid gap-4 md:grid-cols-3">
-        {Object.entries(roleConfig).map(([role, config]) => (
-          <Card key={role} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedRole(role as UserRole)}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Shield className="h-4 w-4" />
-                {config.label}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                {config.permissions.map((permission, index) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-                    {permission}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">Total Usuarios</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{users.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">Administradores</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {users.filter(u => u.role === 'admin').length}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">Vendedores</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {users.filter(u => u.role === 'seller').length}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Búsqueda */}
@@ -207,67 +259,84 @@ export function UserManagement() {
       {/* Tabla de usuarios */}
       <Card>
         <CardHeader>
-          <CardTitle>Usuarios del Sistema</CardTitle>
+          <CardTitle>Lista de Usuarios</CardTitle>
           <CardDescription>
             Mostrando {filteredUsers.length} de {users.length} usuarios
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Último Acceso</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={roleConfig[user.role].className}>
-                      {roleConfig[user.role].label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{user.lastLogin}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={user.active}
-                        onCheckedChange={() => toggleUserStatus(user.id)}
-                      />
-                      <span className="text-sm">
-                        {user.active ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleViewUser(user.id)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleEditUser(user.id)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                        onClick={() => handleDeleteUser(user.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          {filteredUsers.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {users.length === 0 ? "No hay usuarios registrados" : "No se encontraron usuarios"}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Rol</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Último Acceso</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={roleColors[user.role]}>
+                        {roleLabels[user.role]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={user.active}
+                          onCheckedChange={() => toggleUserStatus(user.id)}
+                          disabled={!hasPermission('usuarios.edit') || (currentUser && user.id === currentUser.id)}
+                        />
+                        <span className={user.active ? 'text-green-600' : 'text-gray-400'}>
+                          {user.active ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{user.lastLogin}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          setSelectedUser(user);
+                          setViewUserOpen(true);
+                        }}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          setSelectedUser(user);
+                          setEditUserOpen(true);
+                        }} disabled={!hasPermission('usuarios.edit')}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setDeleteUserOpen(true);
+                          }}
+                          disabled={!hasPermission('usuarios.delete') || (currentUser && user.id === currentUser.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-30"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -275,6 +344,7 @@ export function UserManagement() {
         open={newUserOpen}
         onOpenChange={setNewUserOpen}
         onUserCreated={handleUserCreated}
+        roles={roles}
       />
 
       <EditUserDialog
@@ -282,6 +352,7 @@ export function UserManagement() {
         onOpenChange={setEditUserOpen}
         user={selectedUser}
         onUserEdited={handleUserEdited}
+        roles={roles}
       />
 
       <UserDetailsDialog
@@ -294,8 +365,10 @@ export function UserManagement() {
         open={deleteUserOpen}
         onOpenChange={setDeleteUserOpen}
         title="Eliminar Usuario"
-        description="¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer."
-        onConfirm={handleConfirmDelete}
+        description={`¿Estás seguro de que quieres eliminar al usuario "${selectedUser?.name}"? Esta acción no se puede deshacer.`}
+        onConfirm={handleDeleteUser}
+        confirmText="Eliminar"
+        variant="destructive"
       />
     </div>
   );

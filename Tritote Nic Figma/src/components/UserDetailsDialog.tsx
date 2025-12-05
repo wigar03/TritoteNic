@@ -1,7 +1,10 @@
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Mail, Calendar, Shield, Activity } from "lucide-react";
+import { apiService } from "../services/apiService";
+import type { PedidoDto } from "../types/api";
 
 type UserRole = 'admin' | 'seller';
 
@@ -34,6 +37,39 @@ const roleConfig = {
 };
 
 export function UserDetailsDialog({ user, open, onOpenChange }: UserDetailsDialogProps) {
+  const [pedidosCreados, setPedidosCreados] = useState<number>(0);
+  const [clientesGestionados, setClientesGestionados] = useState<number>(0);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
+
+  useEffect(() => {
+    if (open && user) {
+      loadUserStats();
+    }
+  }, [open, user?.id]);
+
+  const loadUserStats = async () => {
+    if (!user) return;
+    
+    try {
+      setIsLoadingStats(true);
+      const pedidos = await apiService.getPedidos();
+      
+      // Contar pedidos creados por este usuario
+      const pedidosDelUsuario = pedidos.filter((p: PedidoDto) => p.idUsuario === user.id);
+      setPedidosCreados(pedidosDelUsuario.length);
+      
+      // Contar clientes únicos gestionados por este usuario
+      const clientesUnicos = new Set(pedidosDelUsuario.map((p: PedidoDto) => p.idCliente).filter(id => id !== undefined && id !== null));
+      setClientesGestionados(clientesUnicos.size);
+    } catch (error) {
+      console.error("Error al cargar estadísticas del usuario:", error);
+      setPedidosCreados(0);
+      setClientesGestionados(0);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
+
   if (!user) return null;
 
   const roleInfo = roleConfig[user.role];
@@ -113,20 +149,22 @@ export function UserDetailsDialog({ user, open, onOpenChange }: UserDetailsDialo
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <p className="text-2xl font-medium text-[#C9A664]">12</p>
-                  <p className="text-sm text-muted-foreground">Pedidos Creados</p>
+              {isLoadingStats ? (
+                <div className="text-center py-4">
+                  <p className="text-sm text-muted-foreground">Cargando estadísticas...</p>
                 </div>
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <p className="text-2xl font-medium text-[#C9A664]">8</p>
-                  <p className="text-sm text-muted-foreground">Clientes Gestionados</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <p className="text-2xl font-medium text-[#C9A664]">{pedidosCreados}</p>
+                    <p className="text-sm text-muted-foreground">Pedidos Creados</p>
+                  </div>
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <p className="text-2xl font-medium text-[#C9A664]">{clientesGestionados}</p>
+                    <p className="text-sm text-muted-foreground">Clientes Gestionados</p>
+                  </div>
                 </div>
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <p className="text-2xl font-medium text-[#C9A664]">24</p>
-                  <p className="text-sm text-muted-foreground">Accesos este Mes</p>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>

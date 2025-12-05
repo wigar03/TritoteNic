@@ -1,0 +1,129 @@
+﻿<Window x:Class="TritoteNic2.Window5"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Nuevo Pedido" Height="650" Width="550"
+        Background="#FFF5F5F5" WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+
+            <StackPanel>
+
+                <!-- TÍTULO -->
+                <TextBlock Text="Nuevo Pedido"
+                           FontSize="22" FontWeight="Bold"/>
+                <TextBlock Text="Paso 3: Confirmar pedido"
+                           Foreground="Gray" Margin="0,3,0,20"/>
+
+                <!-- RESUMEN -->
+                <Border Background="White" CornerRadius="10" Padding="20"
+                        BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,20">
+                    <StackPanel>
+
+                        <TextBlock Text="Resumen del Pedido"
+                                   FontSize="16" FontWeight="Bold"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <TextBlock Text="Cliente:" Width="130" FontWeight="SemiBold"/>
+                            <TextBlock Text="Alfredo Montalvan"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <TextBlock Text="Método de pago:" Width="130" FontWeight="SemiBold"/>
+                            <TextBlock Text="Transferencia"/>
+                        </StackPanel>
+
+                    </StackPanel>
+                </Border>
+
+                <!-- PRODUCTOS -->
+                <Border Background="White" CornerRadius="10" Padding="20"
+                        BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,20">
+
+                    <StackPanel>
+
+                        <TextBlock Text="Productos"
+                                   FontSize="16" FontWeight="Bold"/>
+
+                        <!-- PRODUCTO 1 -->
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Cartera Mini Rosa × 2"/>
+                            <TextBlock Text="$9,000"
+                                       Grid.Column="1"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+
+                        <!-- PRODUCTO 2 -->
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Bolso Bandolera × 1"/>
+                            <TextBlock Text="$7,400"
+                                       Grid.Column="1"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+
+                    </StackPanel>
+                </Border>
+
+                <!-- DESCUENTO -->
+                <StackPanel Margin="0,0,0,10">
+                    <TextBlock Text="Descuento (%)" FontWeight="SemiBold"/>
+                    <TextBox Text="0" Height="35" FontSize="16" Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <!-- SUBTOTAL / TOTAL -->
+                <Border Background="#FFF7F3E8" CornerRadius="10" Padding="20"
+                        BorderBrush="#DDD" BorderThickness="1" Margin="0,0,0,20">
+
+                    <StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Subtotal:" Width="120"/>
+                            <TextBlock Text="$16,400"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <TextBlock Text="Total:"
+                                       Width="120"
+                                       FontSize="18"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="$16,400"
+                                       FontSize="18"
+                                       FontWeight="Bold"/>
+                        </StackPanel>
+
+                    </StackPanel>
+
+                </Border>
+
+                <!-- BOTONES -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+
+                    <Button Content="Atrás"
+                            Width="90" Height="35" Background="#EAEAEA" Margin="0,0,10,0"/>
+
+                    <Button Content="Generar PDF"
+                            Width="120" Height="35" Background="White" Margin="0,0,10,0"/>
+
+                    <Button Content="Confirmar Pedido"
+                            Width="150" Height="35"
+                            Background="#D4B06B" Foreground="White"/>
+
+                </StackPanel>
+
+            </StackPanel>
+
+        </Grid>
+    </ScrollViewer>
+
+</Window>

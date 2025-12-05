@@ -9,11 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Moon, Lock, Mail, Eye, EyeOff, Wifi, WifiOff } from "lucide-react";
+import { Moon, Lock, Mail, Eye, EyeOff, Wifi, WifiOff, Database } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../contexts/AuthContext";
 import { testApiConnection } from "../utils/testConnection";
 import { API_CONFIG } from "../config/api";
+import { apiService } from "../services/apiService";
 
 export function Login() {
   const { login } = useAuth();
@@ -22,6 +23,7 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{ success: boolean; message: string } | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -41,9 +43,17 @@ export function Login() {
       const errorMessage = error instanceof Error 
         ? error.message 
         : "Error al iniciar sesión. Por favor verifica tus credenciales.";
-      toast.error("Error de autenticación", {
-        description: errorMessage,
-      });
+      
+      // Mensaje específico para usuario inactivo
+      if (errorMessage.includes('inactivo') || errorMessage.includes('Usuario inactivo')) {
+        toast.error("Usuario inactivo", {
+          description: "Tu cuenta ha sido desactivada. Contacta al administrador para más información.",
+        });
+      } else {
+        toast.error("Error de autenticación", {
+          description: errorMessage,
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -76,6 +86,24 @@ export function Login() {
       });
     } finally {
       setIsTestingConnection(false);
+    }
+  };
+
+  const handleInitializeDatabase = async () => {
+    setIsInitializing(true);
+    
+    try {
+      const result = await apiService.initializeDatabase();
+      toast.success("Base de datos inicializada", {
+        description: `Se crearon ${result.rolesCreated} roles y ${result.usersCreated} usuarios`,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+      toast.error("Error al inicializar", {
+        description: errorMessage,
+      });
+    } finally {
+      setIsInitializing(false);
     }
   };
 
@@ -161,8 +189,8 @@ export function Login() {
               </Button>
             </form>
 
-            {/* Botón de prueba de conexión */}
-            <div className="mt-4 pt-4 border-t">
+            {/* Botones de utilidad */}
+            <div className="mt-4 pt-4 border-t space-y-2">
               <Button
                 type="button"
                 variant="outline"
@@ -186,6 +214,27 @@ export function Login() {
                   </>
                 )}
               </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleInitializeDatabase}
+                disabled={isInitializing}
+              >
+                {isInitializing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    Inicializando...
+                  </>
+                ) : (
+                  <>
+                    <Database className="h-4 w-4 mr-2" />
+                    Inicializar Base de Datos
+                  </>
+                )}
+              </Button>
+              
               {connectionStatus && (
                 <p className={`text-xs mt-2 ${connectionStatus.success ? 'text-green-600' : 'text-red-600'}`}>
                   {connectionStatus.message}

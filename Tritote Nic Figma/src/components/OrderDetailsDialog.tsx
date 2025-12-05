@@ -1,11 +1,15 @@
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-import { Download, Edit } from "lucide-react";
+import { Download } from "lucide-react";
+import { apiService } from "../services/apiService";
+import type { PedidoDto, DetallePedidoDto } from "../types/api";
 
 interface Order {
   id: string;
+  idPedido: number;
   customer: string;
   date: string;
   status: 'pending' | 'in-progress' | 'completed' | 'cancelled' | 'delayed';
@@ -17,7 +21,7 @@ interface OrderDetailsDialogProps {
   order: Order;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEditClick?: () => void;
+  onGeneratePDF?: () => void;
 }
 
 const statusConfig = {
@@ -28,12 +32,37 @@ const statusConfig = {
   delayed: { label: 'Retrasado', className: 'bg-red-100 text-red-800 border-red-200' },
 };
 
-const mockItems = [
-  { name: 'Bolso Clásico Negro', quantity: 2, price: 8500 },
-  { name: 'Cartera Mini Rosa', quantity: 1, price: 4500 },
-];
+export function OrderDetailsDialog({ order, open, onOpenChange, onGeneratePDF }: OrderDetailsDialogProps) {
+  const [pedidoCompleto, setPedidoCompleto] = useState<PedidoDto | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-export function OrderDetailsDialog({ order, open, onOpenChange, onEditClick }: OrderDetailsDialogProps) {
+  useEffect(() => {
+    if (open && order && order.idPedido) {
+      loadOrderDetails();
+    }
+  }, [open, order?.idPedido]);
+
+  const loadOrderDetails = async () => {
+    if (!order || !order.idPedido) return;
+    
+    try {
+      setIsLoading(true);
+      const pedido = await apiService.getPedido(order.idPedido);
+      setPedidoCompleto(pedido);
+    } catch (error) {
+      console.error("Error al cargar detalles del pedido:", error);
+      setPedidoCompleto(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!order || !order.id) {
+    return null;
+  }
+
+  const detalles = pedidoCompleto?.detalles || pedidoCompleto?.detallesPedido || [];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">{/* Aumentado de max-w-2xl a max-w-3xl */}
@@ -74,27 +103,49 @@ export function OrderDetailsDialog({ order, open, onOpenChange, onEditClick }: O
 
           <Card className="p-4">
             <h4 className="mb-3">Productos</h4>
-            <div className="space-y-3">
-              {mockItems.map((item, index) => (
-                <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div>
-                    <p className="text-sm">{item.name}</p>
-                    <p className="text-xs text-muted-foreground">Cantidad: {item.quantity}</p>
-                  </div>
-                  <p className="text-sm font-medium">${(item.price * item.quantity).toLocaleString()}</p>
-                </div>
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">Cargando productos...</p>
+              </div>
+            ) : detalles.length > 0 ? (
+              <div className="space-y-3">
+                {detalles.map((detalle: DetallePedidoDto, index: number) => {
+                  const nombreProducto = detalle.nombreProducto || 'Producto sin nombre';
+                  const cantidad = detalle.cantidadProducto || detalle.cantidadDetallePedido || 0;
+                  const precioUnitario = detalle.precioUnitarioProducto || detalle.precioUnitarioDetallePedido || 0;
+                  const subtotal = detalle.subtotalProducto || detalle.subtotalDetallePedido || 0;
+                  
+                  return (
+                    <div key={detalle.idDetalle || detalle.idDetallePedido || index} className="flex items-center justify-between py-2 border-b last:border-0">
+                      <div>
+                        <p className="text-sm font-medium">{nombreProducto}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Cantidad: {cantidad} × C${precioUnitario.toFixed(2)}
+                        </p>
+                      </div>
+                      <p className="text-sm font-medium">C${subtotal.toFixed(2)}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">No hay productos en este pedido</p>
+              </div>
+            )}
           </Card>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onEditClick}>
-              <Edit className="h-4 w-4 mr-2" />
-              Editar Estado
-            </Button>
-            <Button className="bg-[#C9A664] hover:bg-[#B8965A]">
+            <Button 
+              className="bg-[#C9A664] hover:bg-[#B8965A]"
+              onClick={() => {
+                if (onGeneratePDF) {
+                  onGeneratePDF();
+                }
+              }}
+            >
               <Download className="h-4 w-4 mr-2" />
-              Descargar PDF
+              Generar PDF
             </Button>
           </div>
         </div>

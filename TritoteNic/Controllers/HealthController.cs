@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TritoteNic.Data;
@@ -7,6 +8,7 @@ namespace TritoteNic.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous] // Permitir acceso sin autenticación para verificar el estado de la API
     public class HealthController : ControllerBase
     {
         private readonly TritoteContext.TritoteConext _context;
@@ -56,7 +58,7 @@ namespace TritoteNic.Controllers
                             message = "CanConnectAsync retornó false pero la consulta funcionó"
                         });
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // Esta excepción será capturada por los catch blocks más abajo
                         throw;

@@ -105,6 +105,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (storedUser) {
             const usuario: UsuarioDto = JSON.parse(storedUser);
             setCurrentUser(usuarioDtoToUser(usuario));
+          } else {
+            // Si hay token pero no usuario, limpiar token (sesión inválida)
+            apiService.logout();
           }
         }
       } catch (error) {
@@ -123,6 +126,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<void> => {
     try {
       const response = await apiService.login({ email, password });
+      
+      // Verificar que el usuario esté activo antes de guardar
+      if (response.usuario.estadoUsuario !== 'Activo') {
+        await logout();
+        throw new Error('Usuario inactivo. No se puede iniciar sesión.');
+      }
       
       // Guardar usuario en localStorage
       localStorage.setItem('auth_user', JSON.stringify(response.usuario));

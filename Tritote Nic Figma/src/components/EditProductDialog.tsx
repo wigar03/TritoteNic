@@ -15,33 +15,119 @@ interface Product {
   image: string;
 }
 
+import type { CategoriaDto } from "../types/api";
+
+interface Product {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  image: string;
+  idCategoria: number;
+  estadoProducto?: string;
+}
+
 interface EditProductDialogProps {
   product: Product | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onProductEdited: (product: Product) => void;
+  categorias?: CategoriaDto[];
 }
 
-const categories = ['Canvas', 'Ecológico', 'Playa', 'Minimalista', 'Market', 'Premium'];
-
-export function EditProductDialog({ product, open, onOpenChange, onProductEdited }: EditProductDialogProps) {
+export function EditProductDialog({ product, open, onOpenChange, onProductEdited, categorias = [] }: EditProductDialogProps) {
   const [formData, setFormData] = useState<Product>({
     id: 0,
     name: '',
     category: 'Canvas',
     price: 0,
     stock: 0,
-    image: ''
+    image: '',
+    idCategoria: 0,
+    estadoProducto: 'Activo'
   });
 
+  const [priceInput, setPriceInput] = useState<string>('');
+  const [stockInput, setStockInput] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (product) {
-      setFormData(product);
+      setFormData({
+        ...product,
+        idCategoria: product.idCategoria || 0,
+        estadoProducto: product.estadoProducto || 'Activo'
+      });
+      setPriceInput(product.price > 0 ? product.price.toString() : '');
+      setStockInput(product.stock > 0 ? product.stock.toString() : '');
       setErrors({});
     }
   }, [product]);
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPriceInput(value);
+    
+    // Permitir borrar completamente
+    if (value === '') {
+      return;
+    }
+    
+    // Validar que sea un número válido con máximo 2 decimales
+    if (/^\d*\.?\d{0,2}$/.test(value)) {
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && numValue >= 0) {
+        setFormData({ ...formData, price: numValue });
+        setErrors({ ...errors, price: '' });
+      }
+    }
+  };
+
+  const handlePriceBlur = () => {
+    if (priceInput === '' || priceInput === '0') {
+      setErrors({ ...errors, price: 'El precio es requerido y debe ser mayor a 0' });
+    } else {
+      const numValue = parseFloat(priceInput);
+      if (isNaN(numValue) || numValue <= 0) {
+        setErrors({ ...errors, price: 'El precio debe ser mayor a 0' });
+      } else {
+        setErrors({ ...errors, price: '' });
+      }
+    }
+  };
+
+  const handleStockChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setStockInput(value);
+    
+    // Permitir borrar completamente
+    if (value === '') {
+      return;
+    }
+    
+    // Validar que sea un número entero válido
+    if (/^\d*$/.test(value)) {
+      const numValue = parseInt(value);
+      if (!isNaN(numValue) && numValue >= 0) {
+        setFormData({ ...formData, stock: numValue });
+        setErrors({ ...errors, stock: '' });
+      }
+    }
+  };
+
+  const handleStockBlur = () => {
+    if (stockInput === '') {
+      setErrors({ ...errors, stock: 'El stock es requerido' });
+    } else {
+      const numValue = parseInt(stockInput);
+      if (isNaN(numValue) || numValue < 0) {
+        setErrors({ ...errors, stock: 'El stock debe ser 0 o mayor' });
+      } else {
+        setErrors({ ...errors, stock: '' });
+      }
+    }
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -50,12 +136,12 @@ export function EditProductDialog({ product, open, onOpenChange, onProductEdited
       newErrors.name = 'El nombre es requerido';
     }
 
-    if (formData.price <= 0) {
-      newErrors.price = 'El precio debe ser mayor a 0';
+    if (priceInput === '' || priceInput === '0' || parseFloat(priceInput) <= 0) {
+      newErrors.price = 'El precio es requerido y debe ser mayor a 0';
     }
 
-    if (formData.stock < 0) {
-      newErrors.stock = 'El stock no puede ser negativo';
+    if (stockInput === '' || parseInt(stockInput) < 0) {
+      newErrors.stock = 'El stock es requerido y debe ser 0 o mayor';
     }
 
     setErrors(newErrors);
@@ -102,23 +188,52 @@ export function EditProductDialog({ product, open, onOpenChange, onProductEdited
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit-product-category">Categoría *</Label>
-            <Select
-              value={formData.category}
-              onValueChange={(value) => setFormData({ ...formData, category: value })}
-            >
-              <SelectTrigger id="edit-product-category">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-product-category">Categoría *</Label>
+              <Select
+                value={formData.idCategoria.toString()}
+                onValueChange={(value) => {
+                  const categoria = categorias.find(c => c.idCategoria.toString() === value);
+                  setFormData({ 
+                    ...formData, 
+                    idCategoria: parseInt(value),
+                    category: categoria?.nombreCategoria || ''
+                  });
+                }}
+              >
+                <SelectTrigger id="edit-product-category">
+                  <SelectValue placeholder="Selecciona una categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categorias.length > 0 ? (
+                    categorias.map((cat) => (
+                      <SelectItem key={cat.idCategoria} value={cat.idCategoria.toString()}>
+                        {cat.nombreCategoria}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>No hay categorías disponibles</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-product-status">Estado *</Label>
+              <Select
+                value={formData.estadoProducto || 'Activo'}
+                onValueChange={(value) => setFormData({ ...formData, estadoProducto: value })}
+              >
+                <SelectTrigger id="edit-product-status">
+                  <SelectValue placeholder="Selecciona un estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Activo">Activo</SelectItem>
+                  <SelectItem value="Inactivo">Inactivo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -126,11 +241,10 @@ export function EditProductDialog({ product, open, onOpenChange, onProductEdited
               <Label htmlFor="edit-product-price">Precio (C$) *</Label>
               <Input
                 id="edit-product-price"
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                type="text"
+                value={priceInput}
+                onChange={handlePriceChange}
+                onBlur={handlePriceBlur}
                 className={errors.price ? 'border-red-500' : ''}
                 placeholder="450.00"
               />
@@ -143,10 +257,10 @@ export function EditProductDialog({ product, open, onOpenChange, onProductEdited
               <Label htmlFor="edit-product-stock">Stock *</Label>
               <Input
                 id="edit-product-stock"
-                type="number"
-                min="0"
-                value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
+                type="text"
+                value={stockInput}
+                onChange={handleStockChange}
+                onBlur={handleStockBlur}
                 className={errors.stock ? 'border-red-500' : ''}
                 placeholder="25"
               />

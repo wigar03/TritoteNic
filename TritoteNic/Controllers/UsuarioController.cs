@@ -115,24 +115,36 @@ namespace TritoteNic.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Crear el nuevo usuario
-                var nuevoUsuario = _mapper.Map<Usuario>(createDto);
-
-                // Hashear contraseña antes de guardar
-                nuevoUsuario.ContrasenaUsuario = HashPassword(createDto.ContrasenaUsuario!);
+                // Crear el nuevo usuario manualmente para asegurar que todos los campos estén correctos
+                var nuevoUsuario = new Usuario
+                {
+                    NombreUsuario = createDto.NombreUsuario!,
+                    EmailUsuario = createDto.EmailUsuario!,
+                    ContrasenaUsuario = HashPassword(createDto.ContrasenaUsuario!),
+                    IdRol = createDto.IdRol,
+                    EstadoUsuario = createDto.EstadoUsuario ?? "Activo",
+                    FechaCreacionUsuario = DateTime.UtcNow
+                };
 
                 _context.Usuarios.Add(nuevoUsuario);
                 await _context.SaveChangesAsync();
 
-                // Registrar en bitácora
-                await _bitacoraService.RegistrarCambioAsync(
-                    tablaAfectada: "Usuario",
-                    accion: "CREATE",
-                    idRegistro: nuevoUsuario.IdUsuario,
-                    descripcionRegistro: nuevoUsuario.NombreUsuario,
-                    datosAnteriores: null,
-                    datosNuevos: new { createDto.NombreUsuario, createDto.EmailUsuario, IdRol = createDto.IdRol },
-                    observaciones: $"Usuario creado: {nuevoUsuario.NombreUsuario}");
+                // Registrar en bitácora (opcional - no debe fallar si hay error)
+                try
+                {
+                    await _bitacoraService.RegistrarCambioAsync(
+                        tablaAfectada: "Usuario",
+                        accion: "CREATE",
+                        idRegistro: nuevoUsuario.IdUsuario,
+                        descripcionRegistro: nuevoUsuario.NombreUsuario,
+                        datosAnteriores: null,
+                        datosNuevos: new { createDto.NombreUsuario, createDto.EmailUsuario, IdRol = createDto.IdRol },
+                        observaciones: $"Usuario creado: {nuevoUsuario.NombreUsuario}");
+                }
+                catch (Exception bitacoraEx)
+                {
+                    _logger.LogWarning($"Error al registrar en bitácora (no crítico): {bitacoraEx.Message}");
+                }
 
                 _logger.LogInformation($"Nuevo usuario '{createDto.NombreUsuario}' creado con ID: {nuevoUsuario.IdUsuario}");
                 return CreatedAtAction(nameof(GetUsuario), new { id = nuevoUsuario.IdUsuario }, _mapper.Map<UsuarioDto>(nuevoUsuario));

@@ -63,9 +63,24 @@ class ApiService {
         
         try {
           const errorJson = JSON.parse(errorText);
-          errorMessage = errorJson.message || errorJson.title || errorMessage;
+          // Manejar errores de validación de ModelState
+          if (errorJson.errors) {
+            const validationErrors = Object.entries(errorJson.errors)
+              .map(([key, value]: [string, any]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+              .join('; ');
+            errorMessage = validationErrors || errorJson.title || errorMessage;
+          } else {
+            errorMessage = errorJson.message || errorJson.title || errorMessage;
+          }
         } catch {
           errorMessage = errorText || `Error ${response.status}: ${response.statusText}`;
+        }
+        
+        // Si es un error 401 (no autorizado) y el mensaje indica usuario inactivo, limpiar sesión
+        if (response.status === 401 && (errorMessage.includes('inactivo') || errorMessage.includes('Usuario inactivo'))) {
+          this.logout();
+          // Lanzar error específico para que el frontend lo maneje
+          throw new Error('Usuario inactivo. Su sesión ha sido cerrada.');
         }
         
         throw new Error(errorMessage);
@@ -104,8 +119,8 @@ class ApiService {
     const response = await this.request<LoginResponseDto>('/Auth/login', {
       method: 'POST',
       body: JSON.stringify({
-        email: credentials.email,
-        password: credentials.password,
+        Email: credentials.email,  // C# espera Email con mayúscula
+        Password: credentials.password,  // C# espera Password con mayúscula
       }),
     });
     
@@ -119,6 +134,12 @@ class ApiService {
 
   async logout(): Promise<void> {
     this.setToken(null);
+  }
+
+  async initializeDatabase(): Promise<{ message: string; rolesCreated: number; usersCreated: number; users: Array<{ email: string; role: string; password: string }> }> {
+    return this.request<{ message: string; rolesCreated: number; usersCreated: number; users: Array<{ email: string; role: string; password: string }> }>('/Auth/initialize', {
+      method: 'POST',
+    });
   }
 
   // Clientes
@@ -214,8 +235,13 @@ class ApiService {
   }
 
   // Reportes
-  async getAnalisisCompleto(): Promise<AnalisisCompletoDto> {
-    return this.request<AnalisisCompletoDto>('/Reportes/analisis-completo');
+  async getAnalisisCompleto(mes?: number, año?: number): Promise<AnalisisCompletoDto> {
+    const params = new URLSearchParams();
+    if (mes !== undefined) params.append('mes', mes.toString());
+    if (año !== undefined) params.append('año', año.toString());
+    const queryString = params.toString();
+    const url = queryString ? `/Reportes/analisis-completo?${queryString}` : '/Reportes/analisis-completo';
+    return this.request<AnalisisCompletoDto>(url);
   }
 
   // Categorías

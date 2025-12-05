@@ -131,14 +131,14 @@ namespace TritoteNic.Services
 
             // Actualizar total gastado y fecha último pedido
             cliente.TotalGastado += totalPedido;
-            cliente.FechaUltimoPedido = DateTime.Now;
+            cliente.FechaUltimoPedido = DateTime.UtcNow;
 
             // Actualizar categoría según total gastado
-            if (cliente.TotalGastado >= 100000)
+            if (cliente.TotalGastado >= 70)
             {
                 cliente.CategoriaCliente = "VIP";
             }
-            else if (cliente.TotalGastado >= 50000)
+            else if (cliente.TotalGastado >= 10)
             {
                 cliente.CategoriaCliente = "Frecuente";
             }
@@ -194,25 +194,63 @@ namespace TritoteNic.Services
                 IdUsuario = createDto.IdUsuario,
                 IdEstadoPedido = createDto.IdEstadoPedido,
                 IdMetodoPago = createDto.IdMetodoPago,
-                FechaPedido = DateTime.Now,
+                FechaPedido = DateTime.UtcNow,
                 SubtotalPedido = subtotalFinal,
                 Descuento = createDto.Descuento,
                 TotalPedido = totalPedido,
                 Detalles = detallesAProcesar
             };
 
-            // Guardar pedido
-            _context.Pedidos.Add(pedido);
-            await _context.SaveChangesAsync();
+            // ⚠️ IMPORTANTE: Usar transacción para asegurar que TODO se actualice de forma atómica
+            // - El pedido solo se crea cuando se confirma
+            // - El stock solo se actualiza cuando se confirma el pedido
+            // - El cliente solo se actualiza cuando se confirma el pedido
+            // - Las ventas se calculan dinámicamente desde los pedidos guardados en BD
+            // Si algo falla, TODO se revierte (pedido no creado, stock no actualizado, cliente no actualizado)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // 1. Guardar pedido en la BD (con todos sus detalles)
+                    //    Esto hace que el pedido aparezca en las consultas de ventas
+                    _context.Pedidos.Add(pedido);
+                    await _context.SaveChangesAsync();
 
-            // Actualizar stock
-            await ActualizarStockAsync(detallesAProcesar);
+                    // 2. Actualizar stock de productos (SOLO después de confirmar el pedido)
+                    //    Se resta la cantidad vendida del stock disponible
+                    await ActualizarStockAsync(detallesAProcesar);
 
-            // Actualizar cliente
-            await ActualizarClienteAsync(createDto.IdCliente, totalPedido);
+                    // 3. Actualizar información del cliente (SOLO después de confirmar el pedido)
+                    //    - TotalGastado: se suma el total del pedido
+                    //    - FechaUltimoPedido: se actualiza a la fecha actual
+                    //    - CategoriaCliente: se recalcula según el total gastado
+                    await ActualizarClienteAsync(createDto.IdCliente, totalPedido);
 
-            // Guardar todos los cambios
-            await _context.SaveChangesAsync();
+                    // 4. Guardar todos los cambios (stock y cliente) en una sola operación
+                    await _context.SaveChangesAsync();
+
+                    // 5. Confirmar transacción - TODO se actualiza al mismo tiempo
+                    //    Si llegamos aquí, significa que:
+                    //    - ✅ El pedido está guardado
+                    //    - ✅ El stock está actualizado
+                    //    - ✅ El cliente está actualizado
+                    //    - ✅ Las ventas se calcularán automáticamente desde los pedidos guardados
+                    await transaction.CommitAsync();
+
+                    _logger.LogInformation($"✅ Transacción completada exitosamente para pedido ID: {pedido.IdPedido}. Stock y cliente actualizados.");
+                }
+                catch (Exception ex)
+                {
+                    // Si algo falla, revertir TODOS los cambios
+                    // - El pedido NO se crea
+                    // - El stock NO se actualiza
+                    // - El cliente NO se actualiza
+                    // - Las ventas NO incluyen este pedido (porque no existe en BD)
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, $"❌ Error en transacción al crear pedido. TODOS los cambios fueron revertidos (pedido no creado, stock no actualizado, cliente no actualizado).");
+                    throw;
+                }
+            }
 
             _logger.LogInformation($"Pedido creado exitosamente con ID: {pedido.IdPedido}");
 
